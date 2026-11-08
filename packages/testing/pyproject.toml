@@ -1,0 +1,32 @@
+[project]
+name = "stratafi-testing"
+version = "0.1.0"
+description = "Test fakes and fixtures for Stratafi: canary helpers, tier gating, compose services and a clamd fake. Never deployed."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "stratafi-core",
+    "boto3>=1.35",
+    "fastapi>=0.115",
+    "psycopg[binary]>=3.2",
+    "pytest>=8.3",
+    "python-multipart>=0.0.20",
+    # stratafi_testing.documents draws its PDFs with reportlab's canvas (BSD-3-Clause).
+    "reportlab>=4.2",
+    "uvicorn>=0.32",
+]
+
+# Loaded by pytest wherever this package is installed, so every package gets the fixtures.
+[project.entry-points.pytest11]
+stratafi = "stratafi_testing.plugin"
+
+[tool.uv.sources]
+stratafi-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_testing"]

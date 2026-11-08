@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.index.v1",
+  "title": "stratafi.index.v1",
+  "description": "A corpus-level index, as built",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.index.v1",
+      "default": "stratafi.index.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "dense",
+        "keyword"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "component": {
+      "title": "Component",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "title": "Params",
+      "type": "object"
+    },
+    "chunk_ids": {
+      "description": "Row or posting i is chunk_ids[i]",
+      "items": {
+        "type": "string"
+      },
+      "title": "Chunk Ids",
+      "type": "array"
+    },
+    "document_ids": {
+      "description": "Each chunk's document, row by row",
+      "items": {
+        "type": "string"
+      },
+      "title": "Document Ids",
+      "type": "array"
+    },
+    "chunks": {
+      "description": "The chunks artifacts it was built from, in order",
+      "items": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Chunks",
+      "type": "array"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Dense: the embedding model",
+      "title": "Model"
+    },
+    "revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Dense: the one embedding revision",
+      "title": "Revision"
+    },
+    "dims": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dims"
+    },
+    "metric": {
+      "anyOf": [
+        {
+          "enum": [
+            "cosine",
+            "dot"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metric"
+    },
+    "dtype": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Dense: how the vectors were stored",
+      "title": "Dtype"
+    },
+    "backend": {
+      "default": "memory",
+      "description": "postgres: the index lives in a table",
+      "enum": [
+        "memory",
+        "postgres"
+      ],
+      "title": "Backend",
+      "type": "string"
+    },
+    "table": {
+      "anyOf": [
+        {
+          "maxLength": 63,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "postgres: its table",
+      "title": "Table"
+    },
+    "stats": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Build numbers, such as ANN recall@10",
+      "title": "Stats",
+      "type": "object"
+    }
+  },
+  "required": [
+    "kind",
+    "component",
+    "version",
+    "chunk_ids",
+    "document_ids",
+    "chunks"
+  ],
+  "type": "object"
+}

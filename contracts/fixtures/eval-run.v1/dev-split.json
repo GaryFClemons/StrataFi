@@ -1,0 +1,238 @@
+{
+  "schema": "stratafi.eval-run.v1",
+  "eval_run": {
+    "id": "b0200a11-0e33-4b10-974b-a89c3d6c0648",
+    "split": "dev",
+    "test_read": false,
+    "created_by": "u-tenant0-editor",
+    "created_at": "2026-10-30T21:17:45.579444Z"
+  },
+  "configuration": {
+    "retrieval": {
+      "name": "hybrid-v1",
+      "top_k": 8,
+      "fusion": {
+        "k": 60,
+        "alpha": 0.5,
+        "method": "rrf"
+      },
+      "rerank": {
+        "params": {
+          "alias": "rerank-default"
+        },
+        "component": "rerank/gateway"
+      },
+      "schema": "stratafi.retrieval.v1",
+      "filters": {
+        "statuses": null,
+        "collections": null,
+        "current_only": true
+      },
+      "candidates": 50,
+      "retrievers": {
+        "dense": {
+          "top_n": 50
+        },
+        "keyword": {
+          "top_n": 50
+        }
+      },
+      "description": ""
+    },
+    "retrieval_hash": "205d6b990daa9dbd6b60eddd1261d30116185c9a2c6182e5e9addcba25ff2ffa",
+    "retrieval_ref": {
+      "id": "4dbf0cdd-b5c1-48d9-a5c4-c09e5f0dc423",
+      "name": "hybrid-v1",
+      "version": 1
+    },
+    "options": {
+      "seed": 0,
+      "resamples": 2000,
+      "shard_size": 25,
+      "coverage_threshold": 0.7
+    },
+    "k_eval": 5,
+    "ks": [
+      1,
+      3,
+      5,
+      8,
+      10
+    ],
+    "engine_version": "1.0.0",
+    "scorer_version": "1.0.0"
+  },
+  "inputs": {
+    "pipeline_run": {
+      "id": "86e85b02-69c8-4b93-9466-a6597989008c",
+      "manifest_hash": "351ad224654275816df8a3666bfb483d04f2bce376b7eedacb1d407ca5f9908f",
+      "pipeline_hash": "c482a2505b74a1813eda9857033ddf4cba4d70aedac3f9a5d59a592dc21ceb7b",
+      "corpus_version_id": "e919cecd-1f6d-40e7-8ecd-433d807b5d3c"
+    },
+    "indexes": {
+      "dense": "395a0f9650ab9d736f386be97773e15ab8dfb8f1d7bb6b2246974b5ab9d2f6a1",
+      "keyword": "48dbd6e56aceb3e8bcddffcd85fc2da0788d8b90c2b391586172620321359d93"
+    },
+    "eval_set": {
+      "id": "6e0daab4-05d6-4f80-815d-f64943a519b7",
+      "name": "halcyon-retrieval",
+      "as_of": "2026-11-01",
+      "items": 62,
+      "split": "dev",
+      "version": 1,
+      "version_id": "a11b6248-dd33-4a40-afc7-d399e8f836fd",
+      "document_hash": "9010bede0467e38a41ebdd5579f9842650ef9cfad0429cb4a43fb314e342ac56"
+    }
+  },
+  "models": [
+    {
+      "role": "embed",
+      "component": "embed/gateway",
+      "alias": "embed-default",
+      "served_model": null,
+      "revision": "231cf812994d33a6",
+      "dimensions": null,
+      "dtype": null,
+      "prefixes": {},
+      "tokenizer": null
+    },
+    {
+      "role": "rerank",
+      "component": "rerank/gateway",
+      "alias": "rerank-default",
+      "served_model": null,
+      "revision": "b6ba617bbda606f5",
+      "dimensions": null,
+      "dtype": null,
+      "prefixes": {},
+      "tokenizer": null
+    }
+  ],
+  "environment": {
+    "stratafi_version": "0.1.0",
+    "commit": "4a5d9da2c4f7",
+    "python": "3.12.15",
+    "libraries": {
+      "numpy": "2.5.4",
+      "pypdf": "6.21.2",
+      "httpx2": "2.16.0",
+      "fastapi": "0.162.0",
+      "psycopg": "3.3.6",
+      "pydantic": "2.14.2",
+      "tiktoken": "0.14.0",
+      "defusedxml": "0.7.1",
+      "sqlalchemy": "2.1.6",
+      "snowballstemmer": "3.1.1"
+    },
+    "os": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+    "container_image": null
+  },
+  "hardware": {
+    "host": "worker-1",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_cores": 4,
+    "ram_bytes": 16872808448,
+    "gpus": [],
+    "resource_classes": [
+      "cpu",
+      "io"
+    ]
+  },
+  "execution": {
+    "status": "succeeded",
+    "started_at": "2026-10-30T21:17:45.716569Z",
+    "finished_at": "2026-10-30T21:17:47.698477Z",
+    "duration_ms": 1981.908,
+    "error_code": null,
+    "results_cached": false,
+    "shards": [
+      {
+        "ordinal": 0,
+        "cache_key": "8963b026a412e30a941faebc2c1a472b80fd55fe92deccd98e7e30873075bb81",
+        "items": 25,
+        "status": "succeeded",
+        "cache_hit": false,
+        "duration_ms": 899.388,
+        "error_code": null
+      },
+      {
+        "ordinal": 1,
+        "cache_key": "9d18e1e6e48afb1bf643f21059a219067eb9483ba59b23bc72f86d176cd48da2",
+        "items": 25,
+        "status": "succeeded",
+        "cache_hit": false,
+        "duration_ms": 850.304,
+        "error_code": null
+      },
+      {
+        "ordinal": 2,
+        "cache_key": "f4b526cce4aa6c6ef22f9c70eed03c3b384063a9b93e573694f0ab5687718f91",
+        "items": 13,
+        "status": "succeeded",
+        "cache_hit": false,
+        "duration_ms": 558.628,
+        "error_code": null
+      }
+    ]
+  },
+  "cost": {
+    "providers": {
+      "model_gateway": {
+        "calls": 124,
+        "tokens": 701929
+      }
+    },
+    "currency": "USD",
+    "estimated": 14.03858,
+    "price_table": {
+      "model_gateway": 0.02
+    }
+  },
+  "egress": [
+    {
+      "provider": "model_gateway",
+      "documents": [
+        "03e64b23-4307-45ac-8653-5b694567fef0",
+        "17fc59fb-13fc-4cd4-b29f-cbbd00b79138",
+        "185ac7ed-aeec-40c4-87e6-9b5d24247e7e",
+        "293db76a-dbd3-4f54-87e7-2cdca8b9d12f",
+        "29f4fe0f-d9d2-4a27-ae7f-6aac5cf4eff3",
+        "30e87817-3a78-409f-ad45-6a074638c365",
+        "33d3678c-15d9-4249-90fa-bed0dc2cb755",
+        "3863f739-0bc8-4acf-8383-5f2a262fa2f9",
+        "652cac27-2efd-4d9c-a3fa-11266a10c4f1",
+        "6c4872d7-1850-4171-b21d-5bbdea65bd4f",
+        "6f3a973b-81b7-4970-8093-1b28690f8eb5",
+        "a23f3c61-3ec8-4037-9f0a-b6e663d2f70c",
+        "a8c11a86-525f-4474-944a-b71311bd5e37",
+        "abd4fa50-2c78-48c6-b4f0-ef19c77360b7",
+        "c3c04444-18ba-4deb-b71d-804807ecaaf8",
+        "d031cbc8-74c5-421b-b998-31aadb9fbb5a",
+        "f5a21321-cb61-4042-8ef2-5d54022c6ca8",
+        "fbd1cdb3-921f-40f8-bd76-2651e2f42e58"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "cache_key": "8963b026a412e30a941faebc2c1a472b80fd55fe92deccd98e7e30873075bb81",
+      "kind": "ranked_lists",
+      "size_bytes": 174339
+    },
+    {
+      "cache_key": "9d18e1e6e48afb1bf643f21059a219067eb9483ba59b23bc72f86d176cd48da2",
+      "kind": "ranked_lists",
+      "size_bytes": 173334
+    },
+    {
+      "cache_key": "f4b526cce4aa6c6ef22f9c70eed03c3b384063a9b93e573694f0ab5687718f91",
+      "kind": "ranked_lists",
+      "size_bytes": 88006
+    },
+    {
+      "cache_key": "b3f7dc2a3e7c53482ccfc8f6cce1f1c7949067c34cf76039c457e126c4cf1ea5",
+      "kind": "eval_results",
+      "size_bytes": 563552
+    }
+  ]
+}

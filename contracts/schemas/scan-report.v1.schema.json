@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.scan-report.v1",
+  "title": "stratafi.scan-report.v1",
+  "description": "What each scan check found and what the policy decided",
+  "$defs": {
+    "ScanCheck": {
+      "additionalProperties": false,
+      "description": "One check's result. ``findings`` are counts by category; values never leave the scanner.",
+      "properties": {
+        "component": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Component",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "clean",
+            "infected",
+            "encrypted",
+            "malformed",
+            "limit_exceeded",
+            "pii",
+            "error",
+            "duplicate",
+            "skipped"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A short code",
+          "title": "Reason"
+        },
+        "findings": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Findings",
+          "type": "object"
+        },
+        "details": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "Metadata: engine version, signature revision",
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "component",
+        "version",
+        "outcome"
+      ],
+      "title": "ScanCheck",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.scan-report.v1",
+      "default": "stratafi.scan-report.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "document_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Document Id",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "outcome": {
+      "description": "The most serious outcome any check reached",
+      "enum": [
+        "clean",
+        "infected",
+        "encrypted",
+        "malformed",
+        "limit_exceeded",
+        "pii",
+        "error",
+        "duplicate"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "decision": {
+      "description": "What the policy does with the document",
+      "enum": [
+        "continue",
+        "flag",
+        "exclude"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/ScanCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "findings": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "description": "Totals by category",
+      "title": "Findings",
+      "type": "object"
+    }
+  },
+  "required": [
+    "document_id",
+    "sha256",
+    "outcome",
+    "decision",
+    "checks"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,177 @@
+{
+  "contracts": [
+    {
+      "name": "stratafi.chunk.v1",
+      "description": "One chunk: a line of a chunks artifact (JSONL)",
+      "schema": "schemas/chunk.v1.schema.json",
+      "model": "stratafi_core.artifacts.Chunk",
+      "fixtures": [
+        "fixtures/chunk.v1/chunk.json",
+        "fixtures/chunk.v1/chunks.jsonl"
+      ]
+    },
+    {
+      "name": "stratafi.eval-run.v1",
+      "description": "Everything an eval run recorded",
+      "schema": "schemas/eval-run.v1.schema.json",
+      "model": "stratafi_core.evalruns.EvalRunManifest",
+      "fixtures": [
+        "fixtures/eval-run.v1/dev-split.json"
+      ]
+    },
+    {
+      "name": "stratafi.eval-set.v1",
+      "description": "Questions with known evidence; also reads the retrieval YAML format",
+      "schema": "schemas/eval-set.v1.schema.json",
+      "model": "stratafi_core.evalsets.EvalSet",
+      "fixtures": [
+        "fixtures/eval-set.v1/halcyon-retrieval.yaml",
+        "fixtures/eval-set.v1/minimal.json"
+      ]
+    },
+    {
+      "name": "stratafi.experiment.v1",
+      "description": "A space of configurations against one eval set: factors, objective and budget",
+      "schema": "schemas/experiment.v1.schema.json",
+      "model": "stratafi_core.experiments.ExperimentSpec",
+      "fixtures": [
+        "fixtures/experiment.v1/pdf-parsers-and-chunking.yaml",
+        "fixtures/experiment.v1/random-search.json",
+        "fixtures/experiment.v1/successive-halving.yaml"
+      ]
+    },
+    {
+      "name": "stratafi.index.v1",
+      "description": "A corpus-level index, as built",
+      "schema": "schemas/index.v1.schema.json",
+      "model": "stratafi_core.artifacts.IndexManifest",
+      "fixtures": [
+        "fixtures/index.v1/dense.json",
+        "fixtures/index.v1/keyword.json"
+      ]
+    },
+    {
+      "name": "stratafi.knowledge-profile.v1",
+      "description": "A winning configuration with its evidence, compatibility and review",
+      "schema": "schemas/knowledge-profile.v1.schema.json",
+      "model": "stratafi_core.profiles.KnowledgeProfile",
+      "fixtures": [
+        "fixtures/knowledge-profile.v1/kp-policies.yaml"
+      ]
+    },
+    {
+      "name": "stratafi.model-card.v1",
+      "description": "A trained model: its base, trainer, training set, use and limits",
+      "schema": "schemas/model-card.v1.schema.json",
+      "model": "stratafi_core.training.ModelCard",
+      "fixtures": [
+        "fixtures/model-card.v1/query-adapter.json"
+      ]
+    },
+    {
+      "name": "stratafi.parsed-document.v1",
+      "description": "A parsed document, or a cleaned one with its edits",
+      "schema": "schemas/parsed-document.v1.schema.json",
+      "model": "stratafi_core.artifacts.ParsedDocument",
+      "fixtures": [
+        "fixtures/parsed-document.v1/cleaned.json",
+        "fixtures/parsed-document.v1/policy.json"
+      ]
+    },
+    {
+      "name": "stratafi.pipeline.v1",
+      "description": "How documents become an index (a pipeline spec)",
+      "schema": "schemas/pipeline.v1.schema.json",
+      "model": "stratafi_core.specs.PipelineSpec",
+      "fixtures": [
+        "fixtures/pipeline.v1/baseline-v1.yaml",
+        "fixtures/pipeline.v1/minimal.json"
+      ]
+    },
+    {
+      "name": "stratafi.raw-document.v1",
+      "description": "A document's stored bytes and what they are: the extract stage's output",
+      "schema": "schemas/raw-document.v1.schema.json",
+      "model": "stratafi_core.artifacts.RawDocument",
+      "fixtures": [
+        "fixtures/raw-document.v1/mismatch.json",
+        "fixtures/raw-document.v1/scanned-pdf.json"
+      ]
+    },
+    {
+      "name": "stratafi.retrieval.v1",
+      "description": "How a query searches an index",
+      "schema": "schemas/retrieval.v1.schema.json",
+      "model": "stratafi_core.specs.RetrievalConfig",
+      "fixtures": [
+        "fixtures/retrieval.v1/dense-only.json",
+        "fixtures/retrieval.v1/hybrid-v1.yaml"
+      ]
+    },
+    {
+      "name": "stratafi.run-manifest.v1",
+      "description": "Everything a run recorded",
+      "schema": "schemas/run-manifest.v1.schema.json",
+      "model": "stratafi_core.manifest.RunManifest",
+      "fixtures": [
+        "fixtures/run-manifest.v1/run.json"
+      ]
+    },
+    {
+      "name": "stratafi.scan-report.v1",
+      "description": "What each scan check found and what the policy decided",
+      "schema": "schemas/scan-report.v1.schema.json",
+      "model": "stratafi_core.artifacts.ScanReport",
+      "fixtures": [
+        "fixtures/scan-report.v1/clean.json",
+        "fixtures/scan-report.v1/pii.json"
+      ]
+    },
+    {
+      "name": "stratafi.test-run.v1",
+      "description": "Everything a test run recorded: its resolved inputs, runs and each check's result",
+      "schema": "schemas/test-run.v1.schema.json",
+      "model": "stratafi_core.suites.TestRunRecord",
+      "fixtures": [
+        "fixtures/test-run.v1/failed-threshold.json"
+      ]
+    },
+    {
+      "name": "stratafi.test-suite.v1",
+      "description": "Automated checks on a target: thresholds, baselines, golden queries and triggers",
+      "schema": "schemas/test-suite.v1.schema.json",
+      "model": "stratafi_core.suites.TestSuite",
+      "fixtures": [
+        "fixtures/test-suite.v1/minimal.json",
+        "fixtures/test-suite.v1/policies-regression.yaml"
+      ]
+    },
+    {
+      "name": "stratafi.training-run.v1",
+      "description": "Everything a training run recorded: its trainer, inputs, epochs and model",
+      "schema": "schemas/training-run.v1.schema.json",
+      "model": "stratafi_core.training.TrainingRunManifest",
+      "fixtures": [
+        "fixtures/training-run.v1/query-adapter.json"
+      ]
+    },
+    {
+      "name": "stratafi.training-set.v1",
+      "description": "One eval item as training data: a line of a training set (JSONL)",
+      "schema": "schemas/training-set.v1.schema.json",
+      "model": "stratafi_core.training.TrainingRecord",
+      "fixtures": [
+        "fixtures/training-set.v1/records.jsonl"
+      ]
+    },
+    {
+      "name": "stratafi.vectors.v1",
+      "description": "The sidecar of a vectors array: chunks and model",
+      "schema": "schemas/vectors.v1.schema.json",
+      "model": "stratafi_core.artifacts.VectorsSidecar",
+      "fixtures": [
+        "fixtures/vectors.v1/gateway.json"
+      ]
+    }
+  ]
+}

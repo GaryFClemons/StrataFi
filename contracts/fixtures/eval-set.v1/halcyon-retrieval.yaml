@@ -1,0 +1,28 @@
+# A resolved eval set: two items of the Halcyon demo set (fixtures/demo-corpus; invented).
+schema: stratafi.eval-set.v1
+name: halcyon-retrieval
+description: Two of the Halcyon demo set's retrieval questions, resolved
+tenant: halcyon
+as_of: "2026-11-01"
+defaults: {k: 5}
+askers:
+  staff: {name: staff, roles: [staff], groups: [all-staff]}
+items:
+  - id: version-pto-accrual-rate
+    query: How fast do hourly baristas build up vacation time?
+    asker: {name: staff, roles: [staff], groups: [all-staff]}
+    expected:
+      - doc_key: pto-leave
+        version: "3"
+        section: 2.1 How PTO accrues
+        source_uri: corpus/handbook/pto-leave-v3.md
+        evidence: Hourly staff accrue 1 hour of PTO for every 30 hours worked
+    avoid: [{doc_key: pto-leave, version: "2"}]
+    tags: [pto-leave]
+    split: dev
+  - id: acl-safe-cash-limit--as-staff
+    query: What's the most cash we're allowed to keep in the safe?
+    asker: {name: staff, roles: [staff], groups: [all-staff]}
+    must_not_return: [{doc_key: cash-handling}]
+    tags: [no-evidence]
+    split: test

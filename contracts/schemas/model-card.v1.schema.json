@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.model-card.v1",
+  "title": "stratafi.model-card.v1",
+  "description": "A trained model: its base, trainer, training set, use and limits",
+  "$defs": {
+    "BaseModelRef": {
+      "additionalProperties": false,
+      "description": "What a model was trained from: a component and its model, revision and shape.",
+      "properties": {
+        "component": {
+          "description": "The component that runs the base, e.g. embed/gateway",
+          "title": "Component",
+          "type": "string"
+        },
+        "model": {
+          "description": "Its model: a gateway alias or a catalog ID",
+          "title": "Model",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "dims": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Embedding dimensions, for embedders",
+          "title": "Dims"
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How the dense index scores vectors",
+          "title": "Metric"
+        },
+        "license": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License"
+        }
+      },
+      "required": [
+        "component",
+        "model"
+      ],
+      "title": "BaseModelRef",
+      "type": "object"
+    },
+    "ModelCardModel": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "query-adapter",
+            "embedder",
+            "reranker"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "version",
+        "kind",
+        "created_by",
+        "created_at"
+      ],
+      "title": "ModelCardModel",
+      "type": "object"
+    },
+    "ModelCardUse": {
+      "additionalProperties": false,
+      "properties": {
+        "how": {
+          "description": "Where the model is named to use it",
+          "title": "How",
+          "type": "string"
+        },
+        "lab_only": {
+          "default": true,
+          "title": "Lab Only",
+          "type": "boolean"
+        },
+        "needs": {
+          "description": "Settings and extras it needs",
+          "items": {
+            "type": "string"
+          },
+          "title": "Needs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "how"
+      ],
+      "title": "ModelCardUse",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.model-card.v1",
+      "default": "stratafi.model-card.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelCardModel"
+    },
+    "base": {
+      "$ref": "#/$defs/BaseModelRef"
+    },
+    "trainer": {
+      "additionalProperties": true,
+      "description": "Component, version and parameters",
+      "title": "Trainer",
+      "type": "object"
+    },
+    "training_set": {
+      "additionalProperties": true,
+      "description": "ID, eval set, split, counts and the leak guard's findings",
+      "title": "Training Set",
+      "type": "object"
+    },
+    "training": {
+      "additionalProperties": true,
+      "description": "The run, its baseline, best epoch and that epoch's validation metrics",
+      "title": "Training",
+      "type": "object"
+    },
+    "use": {
+      "$ref": "#/$defs/ModelCardUse"
+    },
+    "limits": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limits",
+      "type": "array"
+    },
+    "artifact": {
+      "additionalProperties": true,
+      "description": "Cache key, size and files",
+      "title": "Artifact",
+      "type": "object"
+    }
+  },
+  "required": [
+    "model",
+    "base",
+    "trainer",
+    "training_set",
+    "training",
+    "use",
+    "artifact"
+  ],
+  "type": "object"
+}

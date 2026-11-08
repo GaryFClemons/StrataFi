@@ -1,0 +1,32 @@
+{
+  "schema": "stratafi.parsed-document.v1",
+  "document_id": "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40",
+  "parser": {
+    "id": "parse/markdown",
+    "version": "1.0.0",
+    "params_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "title": null,
+  "media_type": "text/plain",
+  "pages": [],
+  "elements": [
+    {
+      "id": "e0",
+      "type": "paragraph",
+      "text": "Count the tip jar with another closer.",
+      "char_start": 0,
+      "char_end": 38
+    }
+  ],
+  "text": "Count the tip jar with another closer.",
+  "warnings": [],
+  "edits": [
+    {
+      "rule": "clean/whitespace",
+      "element_id": "e0",
+      "start": 5,
+      "end": 7,
+      "replacement_kind": "space"
+    }
+  ]
+}

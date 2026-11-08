@@ -1,0 +1,88 @@
+# Virtual workspace root: there is no [project] table. Every package lives under packages/ or
+# services/ and has its own pyproject.toml. Run `uv sync --all-packages` on each machine.
+
+[tool.uv.workspace]
+members = ["packages/*", "services/*"]
+
+[tool.uv]
+# Every dependency must install on Linux (x86_64) and Windows (AMD64), the environments below:
+# uv refuses a lock that lacks a wheel for either one. Heavy, Linux-only extras carry a
+# `sys_platform == 'linux'` marker instead.
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'win32' and platform_machine == 'AMD64'",
+]
+
+[tool.uv.sources]
+stratafi-testing = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "stratafi-testing",
+    "httpx2>=2.16",
+    "hypothesis>=6.120",
+    "jsonschema>=4.23",
+    # The SDK's `.to_frame()` (its `frames` extra), so its tests cover DataFrames.
+    "pandas>=2.2",
+    # The light parser extras, so the unit tier runs their goldens: pdfplumber and
+    # OCR (markitdown is a regular dependency). docling and unstructured download models and
+    # stay optional.
+    "pdfplumber>=0.11",
+    "pytesseract>=0.3.13",
+    "rapidocr-onnxruntime>=1.4.4,<2",
+    # scripts/corpus_variants.py renders corpora as PDF, scanned PDF and images.
+    "pillow>=11.0",
+    "pypdfium2>=4.30",
+    "reportlab>=4.2",
+    "pytest>=8.3",
+    "pytest-timeout>=2.3",
+    "ruff>=0.9",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.3"
+addopts = ["--import-mode=importlib", "--strict-markers", "--strict-config", "-ra", "-p", "pytester"]
+testpaths = ["packages", "services", "scripts"]
+markers = [
+    "integration: needs Postgres, SeaweedFS or ClamAV; start them with the compose_services fixture",
+    "model: needs a real OpenAI-compatible endpoint at STRATAFI_TEST_MODEL_URL",
+    "system: needs the full stack running; set STRATAFI_TEST_SYSTEM=1",
+    "browser: drives the built web app in Chromium with Playwright; set STRATAFI_TEST_BROWSER=1",
+]
+timeout = 300
+xfail_strict = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["data", "docs", "web"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "SIM", "RUF", "PT", "ASYNC", "DTZ", "G", "LOG"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency idiom: `principal: Principal = Depends(require_role("editor"))`.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Header",
+    "fastapi.Query",
+    "stratafi_api.identity.require_role",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106", "S108"]
+"scripts/**" = ["S603", "S607"]
+# Generated from the OpenAPI contract (scripts/export_sdk_models.py): long descriptions stay whole.
+"packages/sdk/src/stratafi/models.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "stratafi",
+    "stratafi_api",
+    "stratafi_components",
+    "stratafi_core",
+    "stratafi_store",
+    "stratafi_testing",
+    "stratafi_worker",
+]

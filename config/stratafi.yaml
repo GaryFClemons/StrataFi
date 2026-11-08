@@ -1,0 +1,63 @@
+# Stratafi's settings for the API and the worker (stratafi_core.settings).
+#
+# ${VAR} comes from the environment, and ${VAR:-default} gives a default; a missing variable
+# without one is an error. STRATAFI_CONFIG_OVERLAY names a directory whose stratafi.yaml merges
+# on top: mappings merge, anything else is replaced. STRATAFI_<SECTION>__<KEY> environment
+# variables override both. Secrets never live here: refer to them by variable name.
+
+database:
+  url: ${STRATAFI_DATABASE_URL}
+
+# Artifacts: files under data/artifacts. STRATAFI_STORAGE__DRIVER=s3 keeps them in an S3 API
+# instead, such as compose's SeaweedFS, at the endpoint and bucket below.
+storage:
+  driver: local
+  endpoint: ${STRATAFI_S3_ENDPOINT:-}
+  access_key: ${STRATAFI_S3_ACCESS_KEY:-}
+  secret_key: ${STRATAFI_S3_SECRET_KEY:-}
+  bucket: ${STRATAFI_S3_BUCKET:-stratafi}
+
+# One person, on one machine: the development key signs every identity token, and a tenant's
+# first token creates its workspace. The UI and the SDK sign in as the local owner by themselves.
+identity:
+  public_key: ${STRATAFI_IDENTITY_PUBLIC_KEY}
+  auto_provision_workspaces: true
+  # Signs the worker's service tokens for the model gateway.
+  service_signing_key: ${STRATAFI_SERVICE_SIGNING_KEY:-}
+  # Development sign-in for the standalone UI and the SDK. Empty turns it off.
+  dev_sign_in_key: ${STRATAFI_DEV_SIGN_IN_KEY:-}
+
+models:
+  # The local model gateway (services/gateway). An empty STRATAFI_MODEL_GATEWAY_URL: none.
+  gateway_url: ${STRATAFI_MODEL_GATEWAY_URL:-http://127.0.0.1:8091}
+  # In-process models, such as sentence-transformers embedders and rerankers.
+  in_process: true
+  # enrich/llm-context and rerank/llm-listwise, which call the gateway's chat models.
+  enrichment_enabled: true
+  llm_rerank_enabled: true
+
+services:
+  clamd: ${STRATAFI_CLAMAV_ADDRESS:-}
+  tika_url: ${STRATAFI_TIKA_URL:-}
+
+providers:
+  # Hosted providers that may receive document text: none until the owner decides.
+  allowed: []
+
+# Custom checks run only in the sandbox: each in a container of docker/sandbox/Dockerfile
+# with no network and no credentials. "none" runs none. A workspace's owner can turn
+# them on only once the sandbox's security review is signed off: set review to its reference.
+#   docker build -f docker/sandbox/Dockerfile -t stratafi/check-sandbox:1 .
+#   STRATAFI_SUITES__SANDBOX__BACKEND=docker STRATAFI_SUITES__SANDBOX__REVIEW=SEC-123
+suites:
+  sandbox:
+    backend: none
+    image: stratafi/check-sandbox:1
+
+worker:
+  # gpu slots run in-process embedders and rerankers, and fine-tune them: one, for this
+  # machine's GPU. A query adapter trains on cpu.
+  slots: { cpu: 2, gpu: 1, io: 4 }
+  lease_seconds: 60
+  heartbeat_seconds: 15
+  max_attempts: 3

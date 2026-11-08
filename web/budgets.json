@@ -1,0 +1,9 @@
+{
+  "$comment": "UI performance budgets in KB, checked by scripts/check-budgets.mjs after a build. Set from the first measurement on 2026-11-04 with about 10% to spare.",
+  "entry_js_gzip_kb": 185,
+  "entry_css_gzip_kb": 45,
+  "largest_lazy_chunk_gzip_kb": 265,
+  "total_js_gzip_kb": 600,
+  "pdf_worker_gzip_kb": 400,
+  "largest_asset_raw_kb": 1400
+}

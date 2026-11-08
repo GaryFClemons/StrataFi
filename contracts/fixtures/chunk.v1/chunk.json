@@ -1,0 +1,25 @@
+{
+  "chunk_id": "434bd459fb4f1c9e54cb533ff90b4557",
+  "document_id": "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40",
+  "ordinal": 0,
+  "text": "5.1 What counts as a new account\n\nAn account is a new account during the first 30 calendar days after it is opened.",
+  "index_text": "Funds Availability Policy\n5 New accounts > 5.1 What counts as a new account\n5.1 What counts as a new account\n\nAn account is a new account during the first 30 calendar days after it is opened.",
+  "element_ids": [
+    "e3",
+    "e4"
+  ],
+  "page_start": 1,
+  "page_end": 1,
+  "char_start": 116,
+  "char_end": 231,
+  "heading_path": [
+    "5 New accounts",
+    "5.1 What counts as a new account"
+  ],
+  "tokens": {
+    "chars/4": 29
+  },
+  "metadata": {
+    "section": "5.1 What counts as a new account"
+  }
+}

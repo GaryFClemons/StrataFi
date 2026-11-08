@@ -1,0 +1,9 @@
+# Tests that load the shipped config: fast leases and backoff, so retries finish quickly.
+identity:
+  auto_provision_workspaces: true
+
+worker:
+  lease_seconds: 5
+  heartbeat_seconds: 1
+  backoff_base_seconds: 0.2
+  backoff_max_seconds: 2

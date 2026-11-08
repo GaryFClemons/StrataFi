@@ -1,0 +1,458 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.experiment.v1",
+  "title": "stratafi.experiment.v1",
+  "description": "A space of configurations against one eval set: factors, objective and budget",
+  "$defs": {
+    "BaseRef": {
+      "additionalProperties": false,
+      "properties": {
+        "pipeline": {
+          "description": "A saved pipeline spec: name or name@version",
+          "maxLength": 80,
+          "title": "Pipeline",
+          "type": "string"
+        },
+        "retrieval": {
+          "description": "A saved retrieval config: name or name@version",
+          "maxLength": 80,
+          "title": "Retrieval",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pipeline",
+        "retrieval"
+      ],
+      "title": "BaseRef",
+      "type": "object"
+    },
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_trials": {
+          "default": 60,
+          "description": "Trials evaluated",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Trials",
+          "type": "integer"
+        },
+        "max_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Estimated spend",
+          "title": "Max Cost Usd"
+        },
+        "max_hours": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 336,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Wall clock",
+          "title": "Max Hours"
+        }
+      },
+      "title": "Budget",
+      "type": "object"
+    },
+    "Constraint": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "description": "A retrieval metric (recall@5) or a measure (latency_ms.p95)",
+          "title": "Metric",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Constraint",
+      "type": "object"
+    },
+    "EvalOptions": {
+      "additionalProperties": false,
+      "description": "How an eval run scores; recorded with it and part of its results' key.",
+      "properties": {
+        "shard_size": {
+          "default": 25,
+          "description": "Queries per shard job",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Shard Size",
+          "type": "integer"
+        },
+        "coverage_threshold": {
+          "default": 0.7,
+          "description": "evidence-coverage-v1: the grade at which a chunk covers evidence",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Coverage Threshold",
+          "type": "number"
+        },
+        "resamples": {
+          "default": 2000,
+          "description": "Bootstrap resamples",
+          "maximum": 20000,
+          "minimum": 100,
+          "title": "Resamples",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 0,
+          "description": "Seeds the bootstrap",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "sample": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvalSample"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Score a seeded sample of the split's items instead of all"
+        }
+      },
+      "title": "EvalOptions",
+      "type": "object"
+    },
+    "EvalSample": {
+      "additionalProperties": false,
+      "description": "The first ``size`` of the split's items in a seeded order (every item without one).",
+      "properties": {
+        "seed": {
+          "default": 0,
+          "description": "Seeds the order",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Items scored",
+          "title": "Size"
+        }
+      },
+      "title": "EvalSample",
+      "type": "object"
+    },
+    "EvalSetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The latest frozen if none",
+          "title": "Version"
+        },
+        "split": {
+          "const": "dev",
+          "default": "dev",
+          "description": "Experiments tune on dev; the test split only confirms a candidate",
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EvalSetRef",
+      "type": "object"
+    },
+    "Execution": {
+      "additionalProperties": false,
+      "properties": {
+        "max_parallel_runs": {
+          "default": 1,
+          "description": "Pipeline runs at once; with one, every shared prefix runs exactly once",
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Max Parallel Runs",
+          "type": "integer"
+        },
+        "max_parallel_evals": {
+          "default": 4,
+          "description": "Eval runs at once",
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Max Parallel Evals",
+          "type": "integer"
+        }
+      },
+      "title": "Execution",
+      "type": "object"
+    },
+    "Objective": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "description": "A retrieval metric: recall@5, mrr@10, ndcg@10…",
+          "title": "Metric",
+          "type": "string"
+        },
+        "rule": {
+          "default": "knowledge-hit-v1",
+          "enum": [
+            "knowledge-hit-v1",
+            "evidence-coverage-v1",
+            "doc-v1"
+          ],
+          "title": "Rule",
+          "type": "string"
+        },
+        "checkpoint": {
+          "default": "final",
+          "enum": [
+            "dense",
+            "keyword",
+            "fused",
+            "candidates",
+            "reranked",
+            "final"
+          ],
+          "title": "Checkpoint",
+          "type": "string"
+        },
+        "goal": {
+          "default": "maximize",
+          "enum": [
+            "maximize",
+            "minimize"
+          ],
+          "title": "Goal",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Objective",
+      "type": "object"
+    },
+    "Strategy": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "default": "grid",
+          "enum": [
+            "grid",
+            "random",
+            "successive-halving"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "n": {
+          "anyOf": [
+            {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trials drawn from the grid: random search's, or successive halving's start",
+          "title": "N"
+        },
+        "seed": {
+          "default": 0,
+          "description": "Seeds the draw and halving's query order",
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "eta": {
+          "default": 3,
+          "description": "successive-halving: a rung keeps 1/eta of its trials for eta x the queries",
+          "maximum": 10,
+          "minimum": 2,
+          "title": "Eta",
+          "type": "integer"
+        },
+        "min_queries": {
+          "default": 10,
+          "description": "successive-halving: the first rung's queries",
+          "maximum": 10000,
+          "minimum": 5,
+          "title": "Min Queries",
+          "type": "integer"
+        }
+      },
+      "title": "Strategy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.experiment.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "corpus": {
+      "description": "A corpus: name, name@version or name@latest",
+      "maxLength": 80,
+      "title": "Corpus",
+      "type": "string"
+    },
+    "eval_set": {
+      "$ref": "#/$defs/EvalSetRef"
+    },
+    "base": {
+      "$ref": "#/$defs/BaseRef"
+    },
+    "objective": {
+      "$ref": "#/$defs/Objective"
+    },
+    "constraints": {
+      "items": {
+        "$ref": "#/$defs/Constraint"
+      },
+      "maxItems": 20,
+      "title": "Constraints",
+      "type": "array"
+    },
+    "factors": {
+      "additionalProperties": {
+        "items": {},
+        "type": "array"
+      },
+      "description": "Paths into the base pipeline spec or retrieval config, each with its levels",
+      "maxProperties": 8,
+      "minProperties": 1,
+      "title": "Factors",
+      "type": "object"
+    },
+    "exclude": {
+      "description": "Combinations to leave out: each maps paths to values, all of which match",
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "maxItems": 100,
+      "title": "Exclude",
+      "type": "array"
+    },
+    "strategy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Strategy"
+        },
+        {
+          "enum": [
+            "grid",
+            "random",
+            "successive-halving"
+          ],
+          "type": "string"
+        }
+      ],
+      "description": "A method's name stands for it with its defaults",
+      "title": "Strategy"
+    },
+    "budget": {
+      "$ref": "#/$defs/Budget"
+    },
+    "execution": {
+      "$ref": "#/$defs/Execution"
+    },
+    "eval_options": {
+      "$ref": "#/$defs/EvalOptions"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "corpus",
+    "eval_set",
+    "base",
+    "objective",
+    "factors"
+  ],
+  "type": "object"
+}

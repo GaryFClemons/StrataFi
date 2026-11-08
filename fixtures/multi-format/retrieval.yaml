@@ -1,0 +1,34 @@
+# Questions about the multi-format fixture corpus, in the retrieval YAML format of
+# fixtures/demo-corpus/retrieval.yaml. Two of the evidence phrases sit in tables, so the
+# pdf-table-images variant loses them. Everything is invented (CC0-1.0).
+tenant: halcyon
+as_of: 2026-11-01
+k: 5
+askers:
+  staff: {roles: [staff], groups: [all-staff]}
+queries:
+  - id: mf-decaf-shot-time
+    query: What shot time are we aiming for on a double decaf?
+    asker: staff
+    expected:
+      - {doc_key: brew-standards, version: "6", section: 2 Recipes, source_uri: corpus/operations/brew-standards-v6.md, evidence: "Decaf espresso, double | 18 g | 38 g | 28–33 seconds"}
+  - id: mf-batch-brew-hold
+    query: How long can drip coffee sit in the airpot before we dump it?
+    asker: staff
+    expected:
+      - {doc_key: brew-standards, version: "6", section: 5 Batch brew holding, source_uri: corpus/operations/brew-standards-v6.md, evidence: "Batch brew is held in its thermal server for no more than 30 minutes"}
+  - id: mf-kids-milk-temp
+    query: How hot should we steam the milk for a child's hot chocolate?
+    asker: staff
+    expected:
+      - {doc_key: brew-standards, version: "6", section: 4 Milk, source_uri: corpus/operations/brew-standards-v6.md, evidence: "kids' drinks are steamed to 120°F (49°C)"}
+  - id: mf-wholesale-200-lb
+    query: A restaurant buys about 200 pounds of coffee a month. What do they pay per pound for single origins?
+    asker: staff
+    expected:
+      - {doc_key: wholesale, version: "4", section: 2 Price tiers, source_uri: corpus/operations/wholesale-v4.md, evidence: "Tier 3: Preferred | 150 to 399 lb | $9.75 | $12.30"}
+  - id: mf-late-wholesale-order
+    query: When does a wholesale order placed at 3 p.m. count as placed?
+    asker: staff
+    expected:
+      - {doc_key: wholesale, version: "4", section: 3 Ordering, source_uri: corpus/operations/wholesale-v4.md, evidence: "Orders placed after 2:00 p.m. count as placed on the next business day."}

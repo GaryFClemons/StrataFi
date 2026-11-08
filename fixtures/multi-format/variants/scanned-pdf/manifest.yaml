@@ -1,0 +1,30 @@
+# A Markdown corpus as scanned-pdf, by scripts/corpus_variants.py (seed 0).
+# Generated: render it again rather than editing it.
+tenant: halcyon
+documents:
+- path: operations/brew-standards-v6.pdf
+  collection: operations
+  doc_key: brew-standards
+  version: '6'
+  effective_from: 2026-08-01
+  title: Espresso and Brew Standards
+  acl:
+    groups:
+    - all-staff
+    users: []
+  source_uri: corpus/operations/brew-standards-v6.md
+  status: published
+  expect: indexed
+- path: operations/wholesale-v4.pdf
+  collection: operations
+  doc_key: wholesale
+  version: '4'
+  effective_from: 2026-07-01
+  title: Wholesale Pricing and Ordering Guide
+  acl:
+    groups:
+    - all-staff
+    users: []
+  source_uri: corpus/operations/wholesale-v4.md
+  status: published
+  expect: indexed

@@ -1,0 +1,10 @@
+{
+  "variant": "pdf",
+  "source_manifest": "0f294a0ee6f0f7814bc43286364f5fcc1a54feae00497f61fe8e10b735b8d20f",
+  "seed": 0,
+  "dpi": null,
+  "documents": 2,
+  "libraries": {
+    "reportlab": "5.1.0"
+  }
+}

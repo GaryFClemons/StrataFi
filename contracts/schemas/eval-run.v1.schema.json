@@ -1,0 +1,705 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.eval-run.v1",
+  "title": "stratafi.eval-run.v1",
+  "description": "Everything an eval run recorded",
+  "$defs": {
+    "EvalConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "retrieval": {
+          "additionalProperties": true,
+          "description": "The resolved retrieval config",
+          "title": "Retrieval",
+          "type": "object"
+        },
+        "retrieval_hash": {
+          "title": "Retrieval Hash",
+          "type": "string"
+        },
+        "retrieval_ref": {
+          "additionalProperties": true,
+          "description": "The saved config: id, name and version",
+          "title": "Retrieval Ref",
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": true,
+          "title": "Options",
+          "type": "object"
+        },
+        "k_eval": {
+          "description": "The cutoff the eval set's own rule uses",
+          "title": "K Eval",
+          "type": "integer"
+        },
+        "ks": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Ks",
+          "type": "array"
+        },
+        "engine_version": {
+          "title": "Engine Version",
+          "type": "string"
+        },
+        "scorer_version": {
+          "title": "Scorer Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "retrieval",
+        "retrieval_hash",
+        "retrieval_ref",
+        "options",
+        "k_eval",
+        "ks",
+        "engine_version",
+        "scorer_version"
+      ],
+      "title": "EvalConfiguration",
+      "type": "object"
+    },
+    "EvalExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelling",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "results_cached": {
+          "default": false,
+          "title": "Results Cached",
+          "type": "boolean"
+        },
+        "shards": {
+          "items": {
+            "$ref": "#/$defs/EvalShardRecord"
+          },
+          "title": "Shards",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "EvalExecution",
+      "type": "object"
+    },
+    "EvalInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "pipeline_run": {
+          "additionalProperties": true,
+          "description": "The run searched: id, manifest hash, corpus",
+          "title": "Pipeline Run",
+          "type": "object"
+        },
+        "indexes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Index kind → its artifact's cache key",
+          "title": "Indexes",
+          "type": "object"
+        },
+        "eval_set": {
+          "additionalProperties": true,
+          "description": "Name, version, hash, split, items, as_of",
+          "title": "Eval Set",
+          "type": "object"
+        }
+      },
+      "required": [
+        "pipeline_run",
+        "indexes",
+        "eval_set"
+      ],
+      "title": "EvalInputs",
+      "type": "object"
+    },
+    "EvalOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key": {
+          "title": "Cache Key",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "size_bytes": {
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cache_key",
+        "kind",
+        "size_bytes"
+      ],
+      "title": "EvalOutput",
+      "type": "object"
+    },
+    "EvalRunInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "dev",
+            "test",
+            "all"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "test_read": {
+          "description": "The run read the locked test split",
+          "title": "Test Read",
+          "type": "boolean"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "split",
+        "test_read",
+        "created_by",
+        "created_at"
+      ],
+      "title": "EvalRunInfo",
+      "type": "object"
+    },
+    "EvalShardRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "cache_key": {
+          "title": "Cache Key",
+          "type": "string"
+        },
+        "items": {
+          "title": "Items",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "cache_hit": {
+          "title": "Cache Hit",
+          "type": "boolean"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        }
+      },
+      "required": [
+        "ordinal",
+        "cache_key",
+        "items",
+        "status",
+        "cache_hit"
+      ],
+      "title": "EvalShardRecord",
+      "type": "object"
+    },
+    "ManifestCost": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ProviderUsage"
+          },
+          "title": "Providers",
+          "type": "object"
+        },
+        "currency": {
+          "default": "USD",
+          "title": "Currency",
+          "type": "string"
+        },
+        "estimated": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated"
+        },
+        "price_table": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Price per 1,000 tokens by provider, at run time",
+          "title": "Price Table",
+          "type": "object"
+        }
+      },
+      "title": "ManifestCost",
+      "type": "object"
+    },
+    "ManifestEgress": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "documents": {
+          "description": "Document IDs",
+          "items": {
+            "type": "string"
+          },
+          "title": "Documents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "ManifestEgress",
+      "type": "object"
+    },
+    "ManifestEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "stratafi_version": {
+          "title": "Stratafi Version",
+          "type": "string"
+        },
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "python": {
+          "title": "Python",
+          "type": "string"
+        },
+        "libraries": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Libraries",
+          "type": "object"
+        },
+        "os": {
+          "title": "Os",
+          "type": "string"
+        },
+        "container_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Image"
+        }
+      },
+      "required": [
+        "stratafi_version",
+        "python",
+        "os"
+      ],
+      "title": "ManifestEnvironment",
+      "type": "object"
+    },
+    "ManifestGpu": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "memory_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Bytes"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Driver"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ManifestGpu",
+      "type": "object"
+    },
+    "ManifestHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The worker host's name, if recorded",
+          "title": "Host"
+        },
+        "cpu_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Model"
+        },
+        "cpu_cores": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Cores"
+        },
+        "ram_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ram Bytes"
+        },
+        "gpus": {
+          "items": {
+            "$ref": "#/$defs/ManifestGpu"
+          },
+          "title": "Gpus",
+          "type": "array"
+        },
+        "resource_classes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resource Classes",
+          "type": "array"
+        }
+      },
+      "title": "ManifestHardware",
+      "type": "object"
+    },
+    "ManifestModel": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "description": "embed, rerank, ...",
+          "title": "Role",
+          "type": "string"
+        },
+        "component": {
+          "title": "Component",
+          "type": "string"
+        },
+        "alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias"
+        },
+        "served_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Served Model"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "dimensions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dimensions"
+        },
+        "dtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dtype"
+        },
+        "prefixes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Prefixes",
+          "type": "object"
+        },
+        "tokenizer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenizer"
+        }
+      },
+      "required": [
+        "role",
+        "component"
+      ],
+      "title": "ManifestModel",
+      "type": "object"
+    },
+    "ProviderUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "default": 0,
+          "title": "Calls",
+          "type": "integer"
+        },
+        "tokens": {
+          "default": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "ProviderUsage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.eval-run.v1",
+      "default": "stratafi.eval-run.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "eval_run": {
+      "$ref": "#/$defs/EvalRunInfo"
+    },
+    "configuration": {
+      "$ref": "#/$defs/EvalConfiguration"
+    },
+    "inputs": {
+      "$ref": "#/$defs/EvalInputs"
+    },
+    "models": {
+      "items": {
+        "$ref": "#/$defs/ManifestModel"
+      },
+      "title": "Models",
+      "type": "array"
+    },
+    "environment": {
+      "$ref": "#/$defs/ManifestEnvironment"
+    },
+    "hardware": {
+      "$ref": "#/$defs/ManifestHardware"
+    },
+    "execution": {
+      "$ref": "#/$defs/EvalExecution"
+    },
+    "cost": {
+      "$ref": "#/$defs/ManifestCost"
+    },
+    "egress": {
+      "items": {
+        "$ref": "#/$defs/ManifestEgress"
+      },
+      "title": "Egress",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/EvalOutput"
+      },
+      "title": "Outputs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "eval_run",
+    "configuration",
+    "inputs",
+    "environment",
+    "hardware",
+    "execution"
+  ],
+  "type": "object"
+}

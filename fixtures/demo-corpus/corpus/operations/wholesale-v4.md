@@ -1,0 +1,40 @@
+# Wholesale Pricing and Ordering Guide
+
+Version 4. Effective July 1, 2026. Owner: Head of Wholesale. Approved by the Leadership Team on June 8, 2026. Replaces version 3.
+
+## 1 Wholesale accounts
+
+Halcyon sells roasted coffee wholesale to cafés, restaurants, grocers, and offices. A business applies for a wholesale account through the wholesale portal, and the Wholesale Manager approves it. Each account has one sales rep, its contact for pricing, orders, and training.
+
+## 2 Price tiers
+
+An account's tier is set by its average monthly volume over the last three full months and reviewed every quarter, in January, April, July, and October. A new account starts in the tier that matches the volume it expects, and the first quarterly review confirms it.
+
+| Tier | Average monthly volume | House blends, per lb | Single origins, per lb | Free training visits a year |
+| --- | --- | --- | --- | --- |
+| Tier 1: Neighbor | Under 50 lb | $11.80 | $14.40 | 1 |
+| Tier 2: Partner | 50 to 149 lb | $10.60 | $13.20 | 2 |
+| Tier 3: Preferred | 150 to 399 lb | $9.75 | $12.30 | 4 |
+| Tier 4: Flagship | 400 lb and up | $9.10 | $11.60 | 6 |
+
+Tier prices are for coffee packed in 5 lb bags. Coffee packed in 12 oz retail bags costs $0.65 more per bag.
+
+## 3 Ordering
+
+Order in the wholesale portal. Orders placed by 2:00 p.m. on a business day are roasted the next business day, and delivered or shipped the business day after roasting. Orders placed after 2:00 p.m. count as placed on the next business day. The minimum order is 10 lb, in any mix of coffees. Standing weekly orders can be set up in the portal and changed up to 2 business days before roasting.
+
+## 4 Delivery
+
+Delivery is free inside the Port Alder delivery zone on orders of 20 lb or more. Smaller orders inside the zone pay a $15 delivery charge. Orders outside the zone ship by ground carrier at cost.
+
+## 5 Payment terms
+
+A new account pays by card for its first two orders, and can then apply for net 30 terms. An invoice more than 15 days past due puts new orders on hold until it's paid, and overdue balances are charged 1.5% a month.
+
+## 6 Discounts
+
+A sales rep can discount up to 5% off the account's tier price. A discount from 5% up to 10% needs the Wholesale Manager's approval, and anything over 10% needs the Head of Wholesale. Discounts are reviewed with the tier each quarter.
+
+## 7 Samples and equipment
+
+A business considering an account can receive up to two free 12 oz sample bags. Espresso equipment is lent only to Tier 3 and Tier 4 accounts that sign a two-year supply agreement.

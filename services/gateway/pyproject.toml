@@ -1,0 +1,27 @@
+[project]
+name = "stratafi-gateway"
+version = "0.1.0"
+description = "StrataFi's local model gateway: Ollama for embeddings and chat, cross-encoders for reranking."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "httpx2>=2.16",
+    "uvicorn>=0.32",
+]
+
+[project.optional-dependencies]
+# Cross-encoder reranking on /v1/rerank (sentence-transformers on torch; a small model is fine
+# on a CPU). Without it the gateway lists no rerank models and /v1/rerank answers 404.
+rerank = ["sentence-transformers>=3.0"]
+
+[project.scripts]
+stratafi-gateway = "stratafi_gateway.main:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_gateway"]

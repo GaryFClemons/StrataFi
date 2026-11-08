@@ -1,0 +1,128 @@
+{
+  "schema": "stratafi.parsed-document.v1",
+  "document_id": "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40",
+  "parser": {
+    "id": "parse/pdfplumber",
+    "version": "1.0.0",
+    "params_hash": "0d974f046d984f836afbc383f0f5fe06b8d3c5702df1d24ee628efff990f7989"
+  },
+  "title": "Wholesale Pricing and Ordering Guide",
+  "media_type": "application/pdf",
+  "pages": [
+    {
+      "number": 1,
+      "width": 612.0,
+      "height": 792.0
+    },
+    {
+      "number": 2,
+      "width": 612.0,
+      "height": 792.0
+    }
+  ],
+  "elements": [
+    {
+      "id": "e0",
+      "type": "title",
+      "text": "Wholesale Pricing and Ordering Guide",
+      "page": 1,
+      "bbox": [
+        72.0,
+        680.0,
+        405.6,
+        704.0
+      ],
+      "char_start": 0,
+      "char_end": 36
+    },
+    {
+      "id": "e1",
+      "type": "paragraph",
+      "text": "Version 4. Effective July 1, 2026. Owner: Head of Wholesale. Approved by the Leadership Team on June 8, 2026. Replaces version 3.",
+      "page": 1,
+      "bbox": [
+        72.0,
+        640.5,
+        538.9,
+        668.0
+      ],
+      "char_start": 38,
+      "char_end": 167
+    },
+    {
+      "id": "e2",
+      "type": "heading",
+      "text": "2 Price tiers",
+      "level": 2,
+      "page": 1,
+      "bbox": [
+        72.0,
+        610.0,
+        168.4,
+        627.5
+      ],
+      "char_start": 169,
+      "char_end": 182
+    },
+    {
+      "id": "e3",
+      "type": "paragraph",
+      "text": "Tier prices are for coffee packed in 5 lb bags. Coffee packed in 12 oz retail bags costs $0.65 more per bag.",
+      "page": 1,
+      "bbox": [
+        72.0,
+        575.0,
+        531.2,
+        602.5
+      ],
+      "char_start": 184,
+      "char_end": 292
+    },
+    {
+      "id": "e4",
+      "type": "table",
+      "text": "Tier | Average monthly volume\nTier 3: Preferred | 150 to 399 lb",
+      "page": 2,
+      "bbox": [
+        72.0,
+        680.0,
+        540.0,
+        716.0
+      ],
+      "table": {
+        "rows": 2,
+        "cols": 2,
+        "cells": [
+          {
+            "r": 0,
+            "c": 0,
+            "text": "Tier",
+            "header": true
+          },
+          {
+            "r": 0,
+            "c": 1,
+            "text": "Average monthly volume",
+            "header": true
+          },
+          {
+            "r": 1,
+            "c": 0,
+            "text": "Tier 3: Preferred",
+            "header": false
+          },
+          {
+            "r": 1,
+            "c": 1,
+            "text": "150 to 399 lb",
+            "header": false
+          }
+        ]
+      },
+      "char_start": 294,
+      "char_end": 357
+    }
+  ],
+  "text": "Wholesale Pricing and Ordering Guide\n\nVersion 4. Effective July 1, 2026. Owner: Head of Wholesale. Approved by the Leadership Team on June 8, 2026. Replaces version 3.\n\n2 Price tiers\n\nTier prices are for coffee packed in 5 lb bags. Coffee packed in 12 oz retail bags costs $0.65 more per bag.\n\nTier | Average monthly volume\nTier 3: Preferred | 150 to 399 lb",
+  "warnings": []
+}

@@ -1,0 +1,7 @@
+# Development: a tenant's first token creates its workspace.
+identity:
+  auto_provision_workspaces: true
+
+# Development: import the synthetic fixtures from the server (extract/folder).
+intake:
+  folder_roots: { fixtures: fixtures }

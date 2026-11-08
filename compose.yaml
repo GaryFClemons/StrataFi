@@ -1,0 +1,388 @@
+# StrataFi on one machine.
+#
+#   uv run python scripts/dev_setup.py      # writes .env and the development keys, once
+#   docker compose pull                     # once: every image is pinned upstream
+#   docker compose up -d --wait             # Postgres 16 with pgvector
+#
+# The API, the worker, the web app and the model gateway then run on the host
+# (`uv run python scripts/local.py up`), or in containers with the "app" profile:
+#
+#   docker compose --profile app build
+#   docker compose --profile app up -d --wait     # the lab: http://127.0.0.1:4100/stratafi/
+#
+# The app profile's model gateway serves the models of Ollama on the host
+# (host.docker.internal:11434), so start Ollama and pull its models first.
+#
+# Optional services, each in a profile of its own name. Start one with `--profile <name>`, and
+# set the variable after it in .env, so the host's processes and the app profile's use it:
+#
+#   clamav      ClamAV's clamd, for scan/clamav              STRATAFI_CLAMAV_ADDRESS
+#   tika        Apache Tika's server, for parse/tika         STRATAFI_TIKA_URL
+#   seaweedfs   SeaweedFS, an S3 API for the artifacts       STRATAFI_STORAGE__DRIVER=s3
+#
+# Every port is published on 127.0.0.1 only, on the ports .env names. Image tags are pinned;
+# never use `latest`. The integration tier starts these services as its own project,
+# stratafi-test, with test-only credentials and on ports Docker picks (stratafi_testing.compose),
+# so tests never touch this project's data.
+name: stratafi
+
+volumes:
+  postgres-data: {}
+  seaweedfs-data: {}
+  clamav-signatures: {}
+  artifacts: {}
+  keys: {}
+
+configs:
+  # SeaweedFS's S3 users: a file the store reads at start, with no administrative API. The
+  # services' own user may read, write, list and tag in StrataFi's bucket only, and can't create,
+  # delete or reach any other; an administrator creates the bucket (seaweedfs-init) and nothing
+  # else uses it. Compose writes the keys from .env into this JSON, so they stay within letters,
+  # digits, '-' and '_', as dev_setup.py's secrets do.
+  seaweedfs-identities:
+    content: |
+      {
+        "identities": [
+          {
+            "name": "${STRATAFI_S3_ACCESS_KEY:-stratafi-dev}",
+            "credentials": [
+              {
+                "accessKey": "${STRATAFI_S3_ACCESS_KEY:-stratafi-dev}",
+                "secretKey": "${STRATAFI_S3_SECRET_KEY:?run "uv run python scripts/dev_setup.py" first}"
+              }
+            ],
+            "actions": [
+              "Read:${STRATAFI_S3_BUCKET:-stratafi}",
+              "Write:${STRATAFI_S3_BUCKET:-stratafi}",
+              "List:${STRATAFI_S3_BUCKET:-stratafi}",
+              "Tagging:${STRATAFI_S3_BUCKET:-stratafi}"
+            ]
+          },
+          {
+            "name": "${STRATAFI_S3_ADMIN_ACCESS_KEY:-stratafi-admin}",
+            "credentials": [
+              {
+                "accessKey": "${STRATAFI_S3_ADMIN_ACCESS_KEY:-stratafi-admin}",
+                "secretKey": "${STRATAFI_S3_ADMIN_SECRET_KEY:?run "uv run python scripts/dev_setup.py" first}"
+              }
+            ],
+            "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+          }
+        ]
+      }
+
+# The API's and the worker's settings in the app profile: compose's own addresses for the
+# services, and the development keys from the keys volume.
+x-app-environment: &app-environment
+  STRATAFI_ENV: dev
+  STRATAFI_LOG_LEVEL: ${STRATAFI_LOG_LEVEL:-INFO}
+  STRATAFI_CONFIG_OVERLAY: /opt/stratafi/config/overlays/dev
+  STRATAFI_DATABASE_URL: postgresql://stratafi:${STRATAFI_PG_PASSWORD:?run "uv run python scripts/dev_setup.py" first}@postgres:5432/stratafi
+  STRATAFI_IDENTITY_PUBLIC_KEY: /run/stratafi/keys/identity-signing.pub.pem
+  STRATAFI_SERVICE_SIGNING_KEY: /run/stratafi/keys/identity-signing.pem
+  STRATAFI_MODEL_GATEWAY_URL: http://gateway:8091
+  # Artifacts in the artifacts volume, or in SeaweedFS with STRATAFI_STORAGE__DRIVER=s3.
+  STRATAFI_STORAGE__DRIVER: ${STRATAFI_STORAGE__DRIVER:-local}
+  STRATAFI_S3_ENDPOINT: http://seaweedfs:9000
+  STRATAFI_S3_ACCESS_KEY: ${STRATAFI_S3_ACCESS_KEY:-stratafi-dev}
+  STRATAFI_S3_SECRET_KEY: ${STRATAFI_S3_SECRET_KEY:?run "uv run python scripts/dev_setup.py" first}
+  STRATAFI_S3_BUCKET: ${STRATAFI_S3_BUCKET:-stratafi}
+  # ClamAV and Tika when .env names them for the host: their profiles' services here.
+  STRATAFI_CLAMAV_ADDRESS: ${STRATAFI_CLAMAV_ADDRESS:+clamav:3310}
+  STRATAFI_TIKA_URL: ${STRATAFI_TIKA_URL:+http://tika:9998}
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    # No text in logs: by default Postgres logs the full text of a failed statement and key
+    # values in its DETAIL lines.
+    command: ["postgres", "-c", "log_min_error_statement=panic", "-c", "log_error_verbosity=terse"]
+    environment:
+      POSTGRES_USER: ${STRATAFI_PG_ADMIN_USER:-stratafi_admin}
+      POSTGRES_PASSWORD: ${STRATAFI_PG_ADMIN_PASSWORD:?run "uv run python scripts/dev_setup.py" first}
+      POSTGRES_DB: postgres
+    ports: ["127.0.0.1:${STRATAFI_PG_PORT-5442}:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      # Over TCP: during first-start initialization the server listens only on its socket.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  # --- optional: the seaweedfs, clamav and tika profiles ------------------------------------
+
+  seaweedfs:
+    profiles: ["seaweedfs"]
+    # One `weed server`. The IAM API is off (-s3.iam=false), so users come only from the identity
+    # file; uploads never create a bucket; the Iceberg and Lance ports and directory listing are
+    # off. Its gateway and gRPC port listen on the compose network, everything else on the
+    # container's loopback, and only S3 reaches the host.
+    image: chrislusf/seaweedfs:4.51@sha256:f7a49e3f3972ebed5be2ed4befa4a0c68eb7bdddba6e692d42729ceb545134b8
+    # The image's entry adds -dir=/data and -master.volumeSizeLimitMB=1024, and runs weed as its
+    # own user, seaweed. -volume.max: the default divides free disk by the volume size, and each
+    # new bucket takes seven slots, so a small disk would starve the second bucket.
+    command:
+      - server
+      - -ip=127.0.0.1
+      - -ip.bind=127.0.0.1
+      - -volume.max=10000
+      - -filer
+      - -filer.exposeDirectoryData=false
+      - -filer.disableDirListing=true
+      - -s3
+      - -s3.ip.bind=0.0.0.0
+      - -s3.port=9000
+      - -s3.port.iceberg=0
+      - -s3.port.lance=0
+      - -s3.config=/etc/seaweedfs/identities.json
+      - -s3.iam=false
+      - -s3.autoCreateBucket=false
+    configs:
+      - source: seaweedfs-identities
+        target: /etc/seaweedfs/identities.json
+    ports: ["127.0.0.1:${STRATAFI_S3_PORT-9100}:9000"]
+    volumes: ["seaweedfs-data:/data"]
+    healthcheck:
+      # Ready once the S3 gateway answers and a volume server has registered with the master, so
+      # the first write finds a volume.
+      test:
+        - CMD-SHELL
+        - >-
+          curl -fsS -o /dev/null http://127.0.0.1:9000/healthz &&
+          curl -fsS http://127.0.0.1:9333/dir/status | grep -q '"Max":[1-9]'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  seaweedfs-init:
+    profiles: ["seaweedfs"]
+    # Creates the bucket, marks itself ready and then idles, so `docker compose up --wait` can
+    # report it healthy: a job that exits makes `--wait` fail even when it succeeded. SeaweedFS
+    # answers 409 (BucketAlreadyOwnedByYou) when the bucket already exists.
+    image: curlimages/curl:8.17.0
+    init: true
+    depends_on:
+      seaweedfs: { condition: service_healthy }
+    environment:
+      # The administrator: the services' user can't create a bucket.
+      S3_ACCESS_KEY: ${STRATAFI_S3_ADMIN_ACCESS_KEY:-stratafi-admin}
+      S3_SECRET_KEY: ${STRATAFI_S3_ADMIN_SECRET_KEY:?run "uv run python scripts/dev_setup.py" first}
+      S3_BUCKET: ${STRATAFI_S3_BUCKET:-stratafi}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        code=$$(curl -sS -o /dev/null -w '%{http_code}' --aws-sigv4 'aws:amz:us-east-1:s3' \
+          --user "$$S3_ACCESS_KEY:$$S3_SECRET_KEY" -X PUT "http://seaweedfs:9000/$$S3_BUCKET")
+        case "$$code" in
+          200|409) echo "bucket ready (HTTP $$code)" ;;
+          *) echo "bucket creation failed (HTTP $$code)" >&2; exit 1 ;;
+        esac
+        touch /tmp/bucket-ready
+        exec sleep infinity
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/bucket-ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    restart: unless-stopped
+
+  clamav:
+    profiles: ["clamav"]
+    # Read-only, with the signatures in a volume that freshclam keeps current. Until freshclam
+    # first succeeds, clamd uses the signatures baked into the image; scan/clamav refuses
+    # signatures more than 72 hours old, so freshclam must reach its mirror.
+    image: clamav/clamav:1.4.6@sha256:982e28f90061d0e66eb03276419f589a47c9fa601e985e472fc2f6c64b497ca0
+    ports: ["127.0.0.1:${STRATAFI_CLAMAV_PORT-3320}:3310"]
+    read_only: true
+    tmpfs: ["/tmp", "/run/clamav", "/var/lock", "/var/log/clamav"]
+    volumes: ["clamav-signatures:/var/lib/clamav"]
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID"]
+    restart: unless-stopped
+
+  tika:
+    profiles: ["tika"]
+    # Apache Tika's full image, read-only with a scratch tmpfs: parse/tika calls it.
+    image: apache/tika:3.2.3.0-full
+    ports: ["127.0.0.1:${STRATAFI_TIKA_PORT-9998}:9998"]
+    read_only: true
+    tmpfs: ["/tmp:size=512m,mode=1777"]
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m -Djava.io.tmpdir=/tmp"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:9998/version >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    restart: unless-stopped
+
+  # --- the app profile: the API, the worker, the web app and the model gateway ---------------
+
+  api:
+    profiles: ["app"]
+    image: stratafi/app:dev
+    build: { context: ., dockerfile: docker/app/Dockerfile }
+    # Bootstrap and migrate before serving. Both are idempotent.
+    command:
+      - sh
+      - -c
+      - stratafi-store bootstrap && stratafi-store migrate && exec stratafi-api
+    environment:
+      <<: *app-environment
+      STRATAFI_PG_ADMIN_DSN: postgresql://${STRATAFI_PG_ADMIN_USER:-stratafi_admin}:${STRATAFI_PG_ADMIN_PASSWORD:?run "uv run python scripts/dev_setup.py" first}@postgres:5432/postgres
+      # The development sign-in, which the web app and the SDK use: one person, this machine.
+      STRATAFI_DEV_SIGN_IN_KEY: /run/stratafi/keys/identity-signing.pem
+    volumes:
+      - keys:/run/stratafi/keys:ro
+      - artifacts:/opt/stratafi/data
+    ports: ["127.0.0.1:${STRATAFI_API_PORT-8100}:8000"]
+    # No capabilities and no privilege gain: the API needs neither.
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      keys: { condition: service_healthy }
+      # Only with the seaweedfs profile.
+      seaweedfs-init: { condition: service_healthy, required: false }
+    healthcheck:
+      # Shell form, here and below: Podman's Docker-compatible API splits an exec-form check's
+      # arguments at their spaces (seen with Podman 4.9), which breaks `python -c "..."`.
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/live', timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  worker:
+    profiles: ["app"]
+    image: stratafi/app:dev
+    pull_policy: never # built by the api service
+    command: ["stratafi-worker"]
+    environment:
+      <<: *app-environment
+      STRATAFI_WORKER_HEALTH_FILE: /tmp/stratafi-worker-alive
+    volumes:
+      - keys:/run/stratafi/keys:ro
+      - artifacts:/opt/stratafi/data
+    # No capabilities and no privilege gain. Its parsers confine themselves with seccomp and
+    # Landlock, which Docker's default profile allows: check it with
+    #   docker compose --profile app run --rm worker python -m stratafi_components.confine
+    # It has no Docker socket, so custom checks stay off here (docs/security/threat-model.md).
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    depends_on:
+      api: { condition: service_healthy } # the API applied the migrations
+      gateway: { condition: service_healthy }
+    healthcheck:
+      # The worker touches its health file on every heartbeat (worker.heartbeat_seconds).
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import os, sys, time;
+          sys.exit(time.time() - os.path.getmtime('/tmp/stratafi-worker-alive') > 60)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    stop_grace_period: 40s # worker.shutdown_grace_seconds, plus a margin
+    restart: unless-stopped
+
+  gateway:
+    profiles: ["app"]
+    # The local model gateway (services/gateway): the models of Ollama on the host, for
+    # embeddings and chat. On Linux, Ollama must listen beyond loopback for this to reach it
+    # (OLLAMA_HOST=0.0.0.0). Reranking needs the gateway's rerank extra, which this image leaves
+    # out: for it, run the gateway on the host (scripts/local.py).
+    image: stratafi/app:dev
+    pull_policy: never # built by the api service
+    command: ["stratafi-gateway"]
+    environment:
+      STRATAFI_GATEWAY_HOST: 0.0.0.0
+      STRATAFI_GATEWAY_OLLAMA_URL: http://host.docker.internal:11434
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["127.0.0.1:${STRATAFI_GATEWAY_PORT-8191}:8091"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    healthcheck:
+      # Listening is enough: whether Ollama answers is /health's business.
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import socket; socket.create_connection(('127.0.0.1', 8091), timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  keys:
+    profiles: ["app"]
+    # Copies the development key pair (data/keys/, which only its owner may read) into a volume
+    # as the app's user's (10001), then idles, so `up --wait` can report it healthy.
+    image: stratafi/app:dev
+    pull_policy: never # built by the api service
+    user: "0:0"
+    init: true
+    read_only: true
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        install -m 0400 /keys-in/identity-signing.pem /keys/identity-signing.pem.new
+        install -m 0444 /keys-in/identity-signing.pub.pem /keys/identity-signing.pub.pem.new
+        chown 10001 /keys/identity-signing.pem.new /keys/identity-signing.pub.pem.new
+        mv -f /keys/identity-signing.pem.new /keys/identity-signing.pem
+        mv -f /keys/identity-signing.pub.pem.new /keys/identity-signing.pub.pem
+        exec sleep infinity
+    volumes:
+      - ./data/keys:/keys-in:ro
+      - keys:/keys
+    healthcheck:
+      test: ["CMD", "test", "-s", "/keys/identity-signing.pem"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    # Reading a key another user owns, and handing the copy to the app's user.
+    cap_add: ["CHOWN", "DAC_OVERRIDE"]
+    restart: unless-stopped
+
+  web:
+    profiles: ["app"]
+    image: stratafi/web:dev
+    build: { context: ., dockerfile: docker/web/Dockerfile }
+    ports: ["127.0.0.1:${STRATAFI_WEB_PORT-4100}:4180"]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "fetch('http://127.0.0.1:4180/stratafi/').then((r) => process.exit(r.ok ? 0 : 1),
+          () => process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped

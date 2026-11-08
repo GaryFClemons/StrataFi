@@ -1,0 +1,428 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.test-run.v1",
+  "title": "stratafi.test-run.v1",
+  "description": "Everything a test run recorded: its resolved inputs, runs and each check's result",
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "description": "One check's outcome, with what was measured and what it was held to.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "metric",
+            "budget",
+            "safety",
+            "regression",
+            "stage",
+            "golden",
+            "data_change",
+            "revision_guard",
+            "custom"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "error",
+            "skipped"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why it failed, errored or was skipped",
+          "title": "Code"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What was measured",
+          "title": "Value"
+        },
+        "threshold": {
+          "additionalProperties": true,
+          "title": "Threshold",
+          "type": "object"
+        },
+        "baseline_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Value"
+        },
+        "detail": {
+          "additionalProperties": true,
+          "description": "Numbers, codes and counts",
+          "title": "Detail",
+          "type": "object"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceLink"
+          },
+          "maxItems": 50,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "result"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "EvidenceLink": {
+      "additionalProperties": false,
+      "description": "Where a result's evidence is: an eval run, a query in it, a pipeline run, a stage of it,\na document or a chunk. IDs only.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "eval_run",
+            "query",
+            "run",
+            "stage",
+            "document",
+            "chunk",
+            "comparison"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "title": "Id",
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The run the query, stage or chunk is in",
+          "title": "Run Id"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A name, never text",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceLink",
+      "type": "object"
+    },
+    "SuiteRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "document_hash": {
+          "title": "Document Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "version",
+        "document_hash"
+      ],
+      "title": "SuiteRef",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "default": 0,
+          "title": "Checks",
+          "type": "integer"
+        },
+        "passed": {
+          "default": 0,
+          "title": "Passed",
+          "type": "integer"
+        },
+        "failed": {
+          "default": 0,
+          "title": "Failed",
+          "type": "integer"
+        },
+        "errored": {
+          "default": 0,
+          "title": "Errored",
+          "type": "integer"
+        },
+        "skipped": {
+          "default": 0,
+          "title": "Skipped",
+          "type": "integer"
+        }
+      },
+      "title": "Summary",
+      "type": "object"
+    },
+    "TestRunInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "suite": {
+          "$ref": "#/$defs/SuiteRef"
+        },
+        "trigger": {
+          "enum": [
+            "api",
+            "schedule",
+            "corpus_version_frozen",
+            "target_changed",
+            "ci"
+          ],
+          "title": "Trigger",
+          "type": "string"
+        },
+        "triggers": {
+          "description": "Triggers combined into it",
+          "items": {
+            "type": "string"
+          },
+          "title": "Triggers",
+          "type": "array"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        }
+      },
+      "required": [
+        "id",
+        "suite",
+        "trigger",
+        "status",
+        "created_by",
+        "created_at"
+      ],
+      "title": "TestRunInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.test-run.v1",
+      "default": "stratafi.test-run.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "test_run": {
+      "$ref": "#/$defs/TestRunInfo"
+    },
+    "resolved": {
+      "additionalProperties": true,
+      "description": "Target, corpus version, eval set version and baseline, as fixed IDs",
+      "title": "Resolved",
+      "type": "object"
+    },
+    "runs": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "description": "The pipeline and eval runs, the baseline's too",
+      "title": "Runs",
+      "type": "object"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "enum": [
+            "passed",
+            "failed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "failed if a check failed or errored",
+      "title": "Outcome"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "data_change": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What changed in the corpus since the baseline",
+      "title": "Data Change"
+    },
+    "code": {
+      "description": "Custom checks' code: path and SHA-256",
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Code",
+      "type": "array"
+    }
+  },
+  "required": [
+    "test_run"
+  ],
+  "type": "object"
+}

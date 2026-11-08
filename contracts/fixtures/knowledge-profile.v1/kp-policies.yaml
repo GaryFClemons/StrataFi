@@ -1,0 +1,165 @@
+# stratafi.knowledge-profile.v1: kp-policies
+schema: stratafi.knowledge-profile.v1
+name: kp-policies
+description: Fixed 256-token chunks for the Halcyon handbook
+pipeline:
+  schema: stratafi.pipeline.v1
+  name: baseline-v1.x3f2a9c1d07
+  description: 'An experiment''s variant of baseline-v1 v1: stages.chunk.component,
+    stages.chunk.params'
+  stages:
+    extract:
+      component:
+        component: extract/upload
+        params: {}
+      unpack:
+      - component: unpack/zip
+        params:
+          max_entries: 10000
+          max_expanded_bytes: 536870912
+          max_ratio: 100
+    scan:
+      checks:
+      - component: scan/content-safety
+        params:
+          max_bytes: 268435456
+          max_pages: 2000
+          unknown_types: allow
+      - component: scan/clamav
+        params:
+          max_signature_age_hours: 72
+          timeout_seconds: 30.0
+      - component: scan/dedupe
+        params: {}
+      on_outcome:
+        infected: exclude
+        encrypted: exclude
+        malformed: exclude
+        limit_exceeded: exclude
+        pii: exclude
+        error: exclude
+        duplicate: exclude
+    parse:
+      route:
+        default:
+          component: parse/markdown
+          params: {}
+    clean:
+    - component: clean/whitespace
+      params:
+        paragraphs: keep
+    chunk:
+      component: chunk/fixed-tokens
+      params:
+        size: 256
+        overlap: 32
+        token_estimator: chars/4
+      index_text: '{title}
+
+        {heading_path}
+
+        {text}'
+    enrich:
+      component: enrich/none
+      params: {}
+    embed:
+      component: embed/gateway
+      params:
+        batch_size: 32
+        normalize: false
+        document_prefix: ''
+        query_prefix: ''
+        alias: embed-local
+    index:
+      dense:
+        component: index/exact
+        params:
+          metric: cosine
+      keyword:
+        component: index/bm25
+        params:
+          k1: 1.2
+          b: 0.75
+retrieval:
+  schema: stratafi.retrieval.v1
+  name: hybrid-v1
+  description: ''
+  retrievers:
+    dense:
+      top_n: 50
+    keyword:
+      top_n: 50
+  fusion:
+    method: rrf
+    k: 60
+    alpha: 0.5
+  candidates: 50
+  filters:
+    current_only: true
+  rerank:
+    component: rerank/gateway
+    params:
+      alias: rerank-default
+  top_k: 8
+models:
+  embed:
+    component: embed/gateway
+    alias: embed-local
+    revision: 7c1e2b2e0a4d9f31
+    dimensions: 768
+  rerank:
+    component: rerank/gateway
+    alias: rerank-default
+    revision: b9d8a1c2e3f40516
+evidence:
+  experiment:
+    id: 3f2a9c1d-0000-4000-8000-000000000005
+    name: chunking-and-models
+    document_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  trial:
+    id: 5e2a9c1d-0000-4000-8000-000000000003
+    ordinal: 2
+    values:
+      chunk: chunk/fixed-tokens overlap=32 size=256
+      embed.params.alias: embed-local
+  corpus:
+    name: halcyon
+    version: 1
+    version_id: 7c1e2b2e-0000-4000-8000-000000000001
+    documents: 24
+  eval_set:
+    name: halcyon-retrieval
+    version: 1
+    version_id: 9a1b2c3d-0000-4000-8000-000000000004
+    split: dev
+    items: 62
+  objective:
+    metric: recall@5
+    rule: knowledge-hit-v1
+    checkpoint: final
+    goal: maximize
+  dev:
+    mean: 0.878
+    low: 0.792
+    high: 0.946
+    n: 52
+    eval_run_id: 0b5ee1a4-0000-4000-8000-000000000002
+  test:
+    mean: 0.818
+    low: 0.636
+    high: 0.955
+    n: 22
+    eval_run_id: 0b5ee1a4-0000-4000-8000-000000000006
+  test_read: 1
+  guardrails:
+    group: leader
+    equivalent: true
+    recommended: true
+created_by: u-tenant0-editor
+created_at: '2026-10-31T12:00:00Z'
+review:
+  status: approved
+  approvals:
+  - by: u-tenant0-owner
+    at: '2026-10-31T13:30:00Z'
+    decision: approved

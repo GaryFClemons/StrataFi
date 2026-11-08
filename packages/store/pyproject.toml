@@ -1,0 +1,27 @@
+[project]
+name = "stratafi-store"
+version = "0.1.0"
+description = "Stratafi's persistence: SQLAlchemy tables, repositories, Alembic migrations, the artifact store and the job queue."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "stratafi-core",
+    "alembic>=1.14",
+    "boto3>=1.35",
+    "psycopg[binary]>=3.2",
+    "sqlalchemy>=2.0.36",
+]
+
+[project.scripts]
+stratafi-store = "stratafi_store.cli:main"
+
+[tool.uv.sources]
+stratafi-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_store"]

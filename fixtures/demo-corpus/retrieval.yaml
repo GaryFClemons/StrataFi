@@ -1,0 +1,1028 @@
+# retrieval.yaml: retrieval questions over the Halcyon Coffee Co. corpus (corpus/manifest.yaml),
+# in the stratafi.eval-set.v1 retrieval format. Import the corpus with its manifest, then search
+# each query as its asker (the `askers` table below: groups are what document ACLs are checked
+# against) with "today" = as_of and top_k = k.
+#
+# - expected: gold evidence. A result is a hit when it comes from an expected doc_key and version
+#   and its section matches, or its text contains the evidence phrase. Each phrase is a verbatim
+#   substring (at most 100 characters) of that section's own text.
+# - avoid: superseded or not-yet-effective versions that must not rank above the first hit.
+# - must_not_return: documents that must never come back for that asker on that day (ACL copies
+#   suffixed --as-staff / --as-manager, and the future-dated Rewards v4).
+# - expected: [] means no current document answers the question (abstention). near_misses lists
+#   the closest passages, which a good answer cites while saying the policy doesn't cover it.
+#
+# Item IDs start with their type: lookup-, scenario-, table-, version-, acl-, abstain-. Check the
+# set with `uv run --no-sync python fixtures/demo-corpus/check_eval_set.py`. Everything is
+# invented and released under CC0-1.0.
+tenant: halcyon
+description: 'Halcyon Coffee Co. demo corpus: staff questions with gold sections, version traps, ACL checks and abstentions. Everything is invented (CC0-1.0).'
+as_of: '2026-11-01'
+k: 5
+askers:
+  staff:
+    roles:
+    - staff
+    groups:
+    - all-staff
+  manager:
+    roles:
+    - manager
+    groups:
+    - all-staff
+    - managers
+  exec:
+    roles:
+    - exec
+    groups:
+    - all-staff
+    - managers
+    - executives
+queries:
+- id: lookup-shift-lead-swap-approval
+  query: Can my shift lead sign off on a shift trade I set up with a coworker?
+  asker: staff
+  expected:
+  - doc_key: scheduling
+    version: '4'
+    section: 3.1 Trading a shift with a coworker
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: Any other swap needs the Café Manager's approval in the app; Shift Leads can't approve swaps.
+- id: lookup-schedule-posting
+  query: How far ahead does the work schedule come out?
+  asker: staff
+  expected:
+  - doc_key: scheduling
+    version: '4'
+    section: 1 The schedule
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: post each week's schedule in the scheduling app at least 14 days before the week begins
+- id: lookup-clopen-rest
+  query: If I close tonight, what's the earliest I can be scheduled to start tomorrow?
+  asker: staff
+  expected:
+  - doc_key: scheduling
+    version: '4'
+    section: 4 Breaks and rest
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: Allow at least 10 hours between the end of a closing shift and the start of the next shift
+- id: lookup-text-call-out
+  query: Is texting my shift lead enough when I can't make it in?
+  asker: staff
+  expected:
+  - doc_key: scheduling
+    version: '4'
+    section: 5 Missing a shift
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: A text message or a swap-board post isn't notice.
+- id: lookup-asst-manager-tips
+  query: Do assistant managers get a share of the tips when they help out on bar?
+  asker: staff
+  expected:
+  - doc_key: tips
+    version: '3'
+    section: 1 Who shares in tips
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: Café Managers, Assistant Café Managers, and District Managers never share in tips
+- id: lookup-catering-service-charge
+  query: Does the 12% catering fee get split among the baristas?
+  asker: staff
+  expected:
+  - doc_key: tips
+    version: '3'
+    section: 5 Catering orders
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: The service charge is café revenue, not a tip.
+- id: lookup-smartwatch-on-bar
+  query: Can I keep my smartwatch on while I'm working the espresso machine?
+  asker: staff
+  expected:
+  - doc_key: dress-code
+    version: '2'
+    section: 5 Jewelry, nails, and piercings
+    source_uri: corpus/handbook/dress-code-v2.md
+    evidence: Watches, bracelets, and fitness trackers come off before the shift, except medical alert bracelets.
+- id: lookup-non-slip-shoes
+  query: Will Halcyon pay me back for non-slip work shoes?
+  asker: staff
+  expected:
+  - doc_key: dress-code
+    version: '2'
+    section: 3 Shoes
+    source_uri: corpus/handbook/dress-code-v2.md
+    evidence: Halcyon reimburses up to $60 a year toward slip-resistant work shoes
+- id: lookup-steam-wand-burn
+  query: A barista just got scalded by the steam wand. What first aid do we give?
+  asker: staff
+  expected:
+  - doc_key: workplace-safety
+    version: '3'
+    section: 2 Burns and scalds
+    source_uri: corpus/handbook/workplace-safety-v3.md
+    evidence: Cool a burn under cool running water for 20 minutes
+- id: lookup-solo-lift-limit
+  query: What's the heaviest box I'm allowed to carry by myself?
+  asker: staff
+  expected:
+  - doc_key: workplace-safety
+    version: '3'
+    section: 4 Lifting and carrying
+    source_uri: corpus/handbook/workplace-safety-v3.md
+    evidence: Anything over 50 pounds (23 kg) is a two-person lift or goes on a cart.
+- id: lookup-work-injury-insurance
+  query: I hurt my wrist at work. Should I put the urgent care visit on my own health insurance?
+  asker: staff
+  expected:
+  - doc_key: workplace-safety
+    version: '3'
+    section: 6.3 Getting treatment
+    source_uri: corpus/handbook/workplace-safety-v3.md
+    evidence: Don't use personal health insurance for a work injury.
+- id: lookup-staff-discount-roommate
+  query: Can I ring in my staff discount for my roommate's order?
+  asker: staff
+  expected:
+  - doc_key: code-of-conduct
+    version: '2'
+    section: 3.2 Off shift
+    source_uri: corpus/handbook/code-of-conduct-v2.md
+    evidence: The discount covers the employee's own order only.
+- id: lookup-supplier-gift
+  query: A green coffee importer sent me an $80 bottle of wine. Can I keep it?
+  asker: staff
+  expected:
+  - doc_key: code-of-conduct
+    version: '2'
+    section: 4 Gifts
+    source_uri: corpus/handbook/code-of-conduct-v2.md
+    evidence: A gift from a supplier or a wholesale customer worth more than $50 is declined or reported
+- id: lookup-senior-barista-wait
+  query: How long after certifying do I have to wait before testing for Senior Barista?
+  asker: staff
+  expected:
+  - doc_key: barista-training
+    version: '5'
+    section: '1.3 Level 3: Senior Barista'
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: After at least 6 months at Level 2, a barista can test for Level 3.
+- id: lookup-anchor-days
+  query: Which days do HQ people have to come into the office?
+  asker: staff
+  expected:
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 2 Hybrid work
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: HQ staff work in the office on Tuesdays and Thursdays, the anchor days
+- id: lookup-kids-milk-temp
+  query: How hot should we steam the milk for a child's hot chocolate?
+  asker: staff
+  expected:
+  - doc_key: brew-standards
+    version: '6'
+    section: 4 Milk
+    source_uri: corpus/operations/brew-standards-v6.md
+    evidence: kids' drinks are steamed to 120°F (49°C)
+- id: lookup-drip-coffee-hold
+  query: How long can drip coffee sit in the airpot before we dump it?
+  asker: staff
+  expected:
+  - doc_key: brew-standards
+    version: '6'
+    section: 5 Batch brew holding
+    source_uri: corpus/operations/brew-standards-v6.md
+    evidence: Batch brew is held in its thermal server for no more than 30 minutes
+- id: lookup-leftover-pastries
+  query: Can I take the unsold croissants home at the end of the night?
+  asker: staff
+  expected:
+  - doc_key: opening-closing
+    version: '5'
+    section: 3.2 Closing checklist
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: Staff may not take leftover pastries home.
+- id: lookup-giftcard-cash-out
+  query: A guest wants the rest of their gift card balance back in cash. Can we do that?
+  asker: staff
+  expected:
+  - doc_key: refunds-remakes
+    version: '3'
+    section: 2.2 Cash and gift cards
+    source_uri: corpus/operations/refunds-remakes-v3.md
+    evidence: Gift card balances are never paid out in cash
+- id: lookup-pause-mobile
+  query: We're slammed with a long line. Can I switch off app orders for a bit?
+  asker: staff
+  expected:
+  - doc_key: mobile-orders
+    version: '2'
+    section: 4 Pausing mobile ordering
+    source_uri: corpus/operations/mobile-orders-v2.md
+    evidence: can pause mobile ordering in the order tablet for up to 30 minutes
+- id: lookup-oat-milk-gluten
+  query: A guest with celiac disease asked whether our oat milk is gluten-free. Is it?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 5.1 What we track
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Oat milk is not certified gluten-free.
+- id: lookup-who-to-ask
+  query: If none of our policies answers my question, who am I supposed to ask?
+  asker: staff
+  expected:
+  - doc_key: policy-index
+    version: '9'
+    section: 3 When nothing here answers the question
+    source_uri: corpus/handbook/policy-index-v9.md
+    evidence: Café staff bring the question to their Café Manager
+- id: scenario-level1-closing-swap
+  query: A Level 1 barista wants to take a coworker's closing shift at another café; the shift starts tomorrow afternoon. Will the app approve the swap?
+  asker: staff
+  expected:
+  - doc_key: scheduling
+    version: '4'
+    section: 3.1 Trading a shift with a coworker
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: The app approves the swap automatically when three things are true
+  - doc_key: scheduling
+    version: '4'
+    section: 3.2 What a swap can't do
+    source_uri: corpus/handbook/scheduling-v4.md
+    evidence: It can't move a Level 1 barista onto an opening or closing shift.
+- id: scenario-acrylic-nails-plating
+  query: A new barista with acrylic nails is going to plate pastries and fruit cups. What does she need to do?
+  asker: staff
+  expected:
+  - doc_key: dress-code
+    version: '2'
+    section: 5 Jewelry, nails, and piercings
+    source_uri: corpus/handbook/dress-code-v2.md
+    evidence: anyone wearing nail polish or artificial nails wears gloves to handle food that won't be cooked
+  - doc_key: food-safety
+    version: '4'
+    section: 6 Handwashing and gloves
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Wear gloves to handle ready-to-eat food that won't be cooked.
+- id: scenario-tip-share-hours
+  query: This week I worked 28 hours on bar, did a 4-hour training shift and took 8 hours of PTO. Which hours count toward my tip share, and when do I get the cash part?
+  asker: staff
+  expected:
+  - doc_key: tips
+    version: '3'
+    section: 4 Dividing the pool
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: Paid breaks and training shifts count as hours worked.
+  - doc_key: tips
+    version: '3'
+    section: 3.2 Paying out cash tips
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: The Café Manager pays out the week's cash tips in cash every Tuesday
+- id: scenario-workshop-mileage
+  query: I'm driving 40 miles each way from my café to the Train-the-Trainer workshop. Is the drive paid, and what's the mileage rate?
+  asker: staff
+  expected:
+  - doc_key: barista-training
+    version: '5'
+    section: 5 Training time is paid
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: Travel to the roastery for workshops is paid time
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 4.2 Driving
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: Driving your own car on Halcyon business is reimbursed at 70 cents a mile
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 1 Who this policy covers
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: Sections 4 to 6 apply to anyone who travels or spends money for Halcyon.
+- id: scenario-overnight-trip
+  query: 'I''m visiting a wholesale customer out of town: one night in a $240 hotel and dinner with a glass of wine. What gets reimbursed?'
+  asker: staff
+  expected:
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 4.1 Booking
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: Hotels are capped at $225 a night before taxes.
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 4.3 Meals
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: Alcohol isn't reimbursed, except at a client meal a department head approved in advance.
+- id: scenario-open-door-alone
+  query: I'm opening and got here at 5:30, my coworker isn't here yet, and the back door is propped open. What should I do?
+  asker: staff
+  expected:
+  - doc_key: opening-closing
+    version: '5'
+    section: 2.1 Arriving
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: If a door is open, glass is broken, or anything else looks wrong, don't go in
+  - doc_key: opening-closing
+    version: '5'
+    section: 1 Who opens and closes
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: the keyholder waits in their car or another safe place and calls the Café Manager
+- id: scenario-late-espresso-warmup
+  query: Nobody turned the espresso machines on until 6:20 and we open at 6:30. What do we do?
+  asker: staff
+  expected:
+  - doc_key: opening-closing
+    version: '5'
+    section: 2.2 Opening checklist
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: they need 30 minutes to reach temperature
+  - doc_key: opening-closing
+    version: '5'
+    section: 2.3 If the café can't open on time
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: If the café won't be open within 15 minutes of its posted time
+- id: scenario-barista-mobile-refund
+  query: A mobile order was missing a $4 muffin. I'm a barista; can I refund it myself?
+  asker: staff
+  expected:
+  - doc_key: mobile-orders
+    version: '2'
+    section: 6 Wrong or missing items
+    source_uri: corpus/operations/mobile-orders-v2.md
+    evidence: baristas can't refund mobile orders
+  - doc_key: refunds-remakes
+    version: '3'
+    section: 5 Mobile orders
+    source_uri: corpus/operations/refunds-remakes-v3.md
+    evidence: refunds are made in the order tablet, not the register
+- id: scenario-wholesale-late-small-order
+  query: A café account in Port Alder orders 15 lb at 3 p.m. on a Wednesday. When is it roasted, and do they pay for delivery?
+  asker: staff
+  expected:
+  - doc_key: wholesale
+    version: '4'
+    section: 3 Ordering
+    source_uri: corpus/operations/wholesale-v4.md
+    evidence: Orders placed after 2:00 p.m. count as placed on the next business day.
+  - doc_key: wholesale
+    version: '4'
+    section: 4 Delivery
+    source_uri: corpus/operations/wholesale-v4.md
+    evidence: Smaller orders inside the zone pay a $15 delivery charge.
+- id: scenario-tree-nut-reaction
+  query: A guest who's allergic to tree nuts got a hazelnut latte by mistake, and their lips are swelling. What do we do?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 5.3 If a guest has a reaction
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Call 911 if the guest has trouble breathing, swelling of the face or throat, or feels faint.
+  - doc_key: food-safety
+    version: '4'
+    section: 5.1 What we track
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Almond milk and the hazelnut and pistachio syrups contain tree nuts.
+- id: scenario-written-exam-82
+  query: I've been here 50 days and scored 82% on the written coffee exam. Can I certify to Level 2 yet, and when can I retake it?
+  asker: staff
+  expected:
+  - doc_key: barista-training
+    version: '5'
+    section: '1.2 Level 2: Certified Barista'
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: a score of 85% or higher on the written coffee exam
+  - doc_key: barista-training
+    version: '5'
+    section: 3 Exams and retakes
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: The written exam can be retaken after 7 days
+- id: scenario-fever-call-out
+  query: I woke up with a sore throat and a fever. Can I still work my shift, and will I need a doctor's note?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 7 Illness
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: An employee with a sore throat and a fever works only away from food and drinks
+  - doc_key: pto-leave
+    version: '3'
+    section: 3 Paid sick time
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: A note from a health care provider is needed only after 3 or more consecutive missed shifts.
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: table-oat-milk-hold
+  query: How many days can an opened carton of oat milk stay in the fridge?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 2 Holding temperatures and times
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Oat, almond, and soy milk, opened | 41°F (5°C) or below | 7 days after opening
+- id: table-dairy-milk-hold
+  query: When does an opened jug of whole milk have to be thrown out?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 2 Holding temperatures and times
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Dairy milk and cream, opened | 41°F (5°C) or below | 4 days after opening
+- id: table-cold-brew-discard
+  query: How long is cold brew concentrate good for after it finishes steeping?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 2 Holding temperatures and times
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Cold brew concentrate | 41°F (5°C) or below | 7 days after the steep ends
+- id: table-sandwich-warmer
+  query: How long can breakfast sandwiches sit in the warmer?
+  asker: staff
+  expected:
+  - doc_key: food-safety
+    version: '4'
+    section: 2 Holding temperatures and times
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Breakfast sandwiches in the warmer | 135°F (57°C) or above | 4 hours after reaching temperature
+- id: table-decaf-shot-time
+  query: What shot time are we aiming for on a double decaf?
+  asker: staff
+  expected:
+  - doc_key: brew-standards
+    version: '6'
+    section: 2 Recipes
+    source_uri: corpus/operations/brew-standards-v6.md
+    evidence: Decaf espresso, double | 18 g | 38 g | 28–33 seconds
+- id: table-pour-over-recipe
+  query: How many grams of coffee and water go into a pour-over?
+  asker: staff
+  expected:
+  - doc_key: brew-standards
+    version: '6'
+    section: 2 Recipes
+    source_uri: corpus/operations/brew-standards-v6.md
+    evidence: Pour-over | 22 g | 350 g water | 3:00–3:30 minutes
+- id: table-house-espresso
+  query: What are the dose and yield for a double shot of the house blend?
+  asker: staff
+  expected:
+  - doc_key: brew-standards
+    version: '6'
+    section: 2 Recipes
+    source_uri: corpus/operations/brew-standards-v6.md
+    evidence: Signature Blend espresso, double | 18.5 g | 40 g | 27–31 seconds
+- id: table-ice-bin-cleaning
+  query: How often does the ice machine bin get sanitized, and who does it?
+  asker: staff
+  expected:
+  - doc_key: equipment-cleaning
+    version: '3'
+    section: 2 The schedule
+    source_uri: corpus/operations/equipment-cleaning-v3.md
+    evidence: Ice machine | Empty, wash, and sanitize the bin and scoop | Weekly, at Wednesday close
+- id: table-water-filter
+  query: How often are the water filter cartridges swapped out?
+  asker: staff
+  expected:
+  - doc_key: equipment-cleaning
+    version: '3'
+    section: 2 The schedule
+    source_uri: corpus/operations/equipment-cleaning-v3.md
+    evidence: Water filters | Replace the cartridges | Every 6 months, or sooner at 4,000 gallons
+- id: table-wholesale-200-lb
+  query: A restaurant buys about 200 pounds of coffee a month. What do they pay per pound for single origins?
+  asker: staff
+  expected:
+  - doc_key: wholesale
+    version: '4'
+    section: 2 Price tiers
+    source_uri: corpus/operations/wholesale-v4.md
+    evidence: 'Tier 3: Preferred | 150 to 399 lb | $9.75 | $12.30'
+- id: table-wholesale-training-visits
+  query: How many free training visits a year come with our top wholesale tier?
+  asker: staff
+  expected:
+  - doc_key: wholesale
+    version: '4'
+    section: 2 Price tiers
+    source_uri: corpus/operations/wholesale-v4.md
+    evidence: 'Tier 4: Flagship | 400 lb and up | $9.10 | $11.60 | 6'
+- id: table-safe-procedure-owner
+  query: I'm a barista with a question about how the café safe works. Who owns that procedure?
+  asker: staff
+  expected:
+  - doc_key: policy-index
+    version: '9'
+    section: 2 Owners
+    source_uri: corpus/handbook/policy-index-v9.md
+    evidence: Cash and safes (managers) | Cash Handling and Safe Procedures | Director of Café Operations
+  must_not_return:
+  - doc_key: cash-handling
+- id: version-pto-accrual-rate
+  query: How fast do hourly baristas build up vacation time?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 2.1 How PTO accrues
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Hourly staff accrue 1 hour of PTO for every 30 hours worked
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-bereavement-grandmother
+  query: My grandmother passed away. How many paid days off do I get for the funeral?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 4 Bereavement leave
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: employees receive up to 5 paid days off
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-week-off-notice
+  query: How much notice do I need to give to take a week off in the spring?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 2.3 Requesting PTO
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: A request for 3 or more consecutive days off needs at least 21 days' notice
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-parental-leave
+  query: I've worked here eight months and we're adopting a baby. How much paid parental leave can I take?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 6 Parental leave
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Employees with at least 6 months of service receive 8 weeks of paid parental leave
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-pto-payout-no-notice
+  query: If I quit without giving two weeks' notice, do I lose my unused vacation hours?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 8 Leaving Halcyon
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Up to 80 hours of unused PTO is paid out on the final paycheck, whatever notice is given.
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-sick-days-from-pto
+  query: Do sick days come out of my vacation balance?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 3 Paid sick time
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Sick time is kept separately from PTO.
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-jury-duty
+  query: I got a jury summons. How many days of jury service will Halcyon pay for?
+  asker: staff
+  expected:
+  - doc_key: pto-leave
+    version: '3'
+    section: 5 Jury duty and voting
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Halcyon pays regular wages for up to 10 scheduled working days of jury duty a year.
+  avoid:
+  - doc_key: pto-leave
+    version: '2'
+- id: version-stars-for-free-drink
+  query: How many stars does a guest need to earn a free drink?
+  asker: staff
+  expected:
+  - doc_key: loyalty
+    version: '3'
+    section: 3 Rewards
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: At 60 points, a guest can redeem a free drink of any size
+  avoid:
+  - doc_key: loyalty
+    version: '2'
+  - doc_key: loyalty
+    version: '4'
+- id: version-points-expiry
+  query: How long before a guest's Rewards points expire?
+  asker: staff
+  expected:
+  - doc_key: loyalty
+    version: '3'
+    section: 4 Point expiry
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: Points expire 12 months after the end of the month in which they were earned
+  avoid:
+  - doc_key: loyalty
+    version: '2'
+  - doc_key: loyalty
+    version: '4'
+- id: version-birthday-reward
+  query: What does a Rewards guest get on their birthday, and how long do they have to use it?
+  asker: staff
+  expected:
+  - doc_key: loyalty
+    version: '3'
+    section: 5 Birthday reward
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: get a free drink of any size, valid for 7 days starting on their birthday
+  avoid:
+  - doc_key: loyalty
+    version: '2'
+  - doc_key: loyalty
+    version: '4'
+- id: version-gold-threshold
+  query: How many points does a guest need in a year to reach Gold status?
+  asker: staff
+  expected:
+  - doc_key: loyalty
+    version: '3'
+    section: 6 Gold status
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: Guests who earn 500 points in a calendar year reach Gold status
+  avoid:
+  - doc_key: loyalty
+    version: '4'
+- id: version-points-adjustment
+  query: A guest's points from last week never posted. How many can I add for them at the register?
+  asker: staff
+  expected:
+  - doc_key: loyalty
+    version: '3'
+    section: 7 Missing points
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: up to 50 points per adjustment
+  avoid:
+  - doc_key: loyalty
+    version: '2'
+  - doc_key: loyalty
+    version: '4'
+- id: version-reusable-cup-bonus
+  query: Do Rewards guests get bonus points for bringing their own reusable cup?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: loyalty
+    version: '4'
+  near_misses:
+  - doc_key: loyalty
+    version: '3'
+    section: 2 Earning points
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: Guests earn 1 point for every $1 spent before tax
+- id: acl-safe-cash-limit
+  query: What's the most cash we're allowed to keep in the safe?
+  asker: manager
+  expected:
+  - doc_key: cash-handling
+    version: '4'
+    section: 5 The safe
+    source_uri: corpus/management/cash-handling-v4.md
+    evidence: Apart from the till floats and a $400 change fund, the safe never holds more than $2,500.
+- id: acl-safe-cash-limit--as-staff
+  query: What's the most cash we're allowed to keep in the safe?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: cash-handling
+- id: acl-hundred-dollar-notes
+  query: A guest is trying to pay with a $100 bill. Can we take it?
+  asker: manager
+  expected:
+  - doc_key: cash-handling
+    version: '4'
+    section: 7 Counterfeit notes
+    source_uri: corpus/management/cash-handling-v4.md
+    evidence: Halcyon cafés don't accept $100 notes.
+- id: acl-hundred-dollar-notes--as-staff
+  query: A guest is trying to pay with a $100 bill. Can we take it?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: cash-handling
+- id: acl-shift-lead-pay-band
+  query: What's the hourly pay range for a shift lead?
+  asker: manager
+  expected:
+  - doc_key: hiring-pay
+    version: '3'
+    section: 3 Pay bands
+    source_uri: corpus/management/hiring-pay-v3.md
+    evidence: Shift Lead | Hourly | $21.00 | $24.00
+- id: acl-shift-lead-pay-band--as-staff
+  query: What's the hourly pay range for a shift lead?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: hiring-pay
+- id: acl-referral-bonus
+  query: How much is the referral bonus if a friend I referred gets hired as a barista?
+  asker: manager
+  expected:
+  - doc_key: hiring-pay
+    version: '3'
+    section: 6 Referral bonus
+    source_uri: corpus/management/hiring-pay-v3.md
+    evidence: receives $300 once a referred barista completes 90 days
+- id: acl-referral-bonus--as-staff
+  query: How much is the referral bonus if a friend I referred gets hired as a barista?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: hiring-pay
+- id: acl-till-short
+  query: A till came up $25 short at close. Who has to be told, and how soon?
+  asker: manager
+  expected:
+  - doc_key: cash-handling
+    version: '4'
+    section: 3.2 Variance limits
+    source_uri: corpus/management/cash-handling-v4.md
+    evidence: is reported to the Café Manager the same day and to the District Manager within 24 hours
+- id: acl-theft-on-the-spot
+  query: I caught a barista taking cash from the till. Can I fire them on the spot?
+  asker: manager
+  expected:
+  - doc_key: performance-discipline
+    version: '2'
+    section: 4 Serious misconduct
+    source_uri: corpus/management/performance-discipline-v2.md
+    evidence: Suspend the employee with pay for up to 5 working days while the People Team investigates
+  - doc_key: performance-discipline
+    version: '2'
+    section: 6 Terminations
+    source_uri: corpus/management/performance-discipline-v2.md
+    evidence: Only the District Manager, with the People Team's approval, can end someone's employment.
+- id: acl-no-show-points
+  query: How many attendance points does a no-call, no-show add?
+  asker: manager
+  expected:
+  - doc_key: performance-discipline
+    version: '2'
+    section: 3 Attendance points
+    source_uri: corpus/management/performance-discipline-v2.md
+    evidence: No-call, no-show | 3
+- id: acl-harbor-point-closure
+  query: Which café are we closing next year, and when will its staff find out?
+  asker: exec
+  expected:
+  - doc_key: expansion-2027
+    version: '1'
+    section: 3 Harbor Point closure
+    source_uri: corpus/executive/expansion-2027-v1.md
+    evidence: The Harbor Point café closes when its lease ends on June 30, 2027
+- id: acl-harbor-point-closure--as-staff
+  query: Which café are we closing next year, and when will its staff find out?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: expansion-2027
+- id: acl-harbor-point-closure--as-manager
+  query: Which café are we closing next year, and when will its staff find out?
+  asker: manager
+  expected: []
+  must_not_return:
+  - doc_key: expansion-2027
+- id: acl-drink-price-rise
+  query: Are drink prices going up in 2027, and by how much?
+  asker: exec
+  expected:
+  - doc_key: expansion-2027
+    version: '1'
+    section: 6 Prices
+    source_uri: corpus/executive/expansion-2027-v1.md
+    evidence: Drink prices rise by an average of 4% on March 1, 2027.
+- id: acl-drink-price-rise--as-staff
+  query: Are drink prices going up in 2027, and by how much?
+  asker: staff
+  expected: []
+  must_not_return:
+  - doc_key: expansion-2027
+- id: abstain-dogs-in-cafe
+  query: Can guests bring their dogs inside the café?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: code-of-conduct
+    version: '2'
+    section: 1 How we treat each other
+    source_uri: corpus/handbook/code-of-conduct-v2.md
+    evidence: Treat guests, coworkers, and suppliers with respect.
+  - doc_key: food-safety
+    version: '4'
+    section: 1 Scope
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: This standard applies to every café and to the roastery's tasting room.
+- id: abstain-guest-wifi
+  query: What's the guest Wi-Fi password at the cafés?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: mobile-orders
+    version: '2'
+    section: 1 How orders arrive
+    source_uri: corpus/operations/mobile-orders-v2.md
+    evidence: The app quotes a ready time of 5 to 12 minutes
+  - doc_key: opening-closing
+    version: '5'
+    section: 2.2 Opening checklist
+    source_uri: corpus/operations/opening-closing-v5.md
+    evidence: Turn on mobile ordering in the order tablet 15 minutes before opening.
+- id: abstain-retirement-match
+  query: Does Halcyon match contributions to a retirement plan?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: barista-training
+    version: '5'
+    section: 2 Pay with each level
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: Reaching Level 2 brings a raise of $1.00 an hour
+  - doc_key: pto-leave
+    version: '3'
+    section: 8 Leaving Halcyon
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: Up to 80 hours of unused PTO is paid out on the final paycheck
+  - doc_key: tips
+    version: '3'
+    section: 2 Card and app tips
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: They're paid with the regular paycheck that covers that week
+- id: abstain-retail-bag-price
+  query: How much does a 12 oz bag of Signature Blend cost at the register?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: wholesale
+    version: '4'
+    section: 2 Price tiers
+    source_uri: corpus/operations/wholesale-v4.md
+    evidence: Coffee packed in 12 oz retail bags costs $0.65 more per bag.
+  - doc_key: loyalty
+    version: '3'
+    section: 3 Rewards
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: At 120 points, they can redeem a 12 oz bag of any whole-bean coffee.
+  - doc_key: code-of-conduct
+    version: '2'
+    section: 3.2 Off shift
+    source_uri: corpus/handbook/code-of-conduct-v2.md
+    evidence: 40% off whole-bean coffee at any Halcyon café
+- id: abstain-payday
+  query: What day of the week is payday?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: tips
+    version: '3'
+    section: 2 Card and app tips
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: They're paid with the regular paycheck that covers that week
+  - doc_key: tips
+    version: '3'
+    section: 3.2 Paying out cash tips
+    source_uri: corpus/handbook/tips-v3.md
+    evidence: The Café Manager pays out the week's cash tips in cash every Tuesday
+- id: abstain-tuition-help
+  query: Will Halcyon help pay for my college classes?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: barista-training
+    version: '5'
+    section: 5 Training time is paid
+    source_uri: corpus/handbook/barista-training-v5.md
+    evidence: All training is paid at the regular rate
+  - doc_key: hq-remote-work
+    version: '2'
+    section: 3 Home office support
+    source_uri: corpus/handbook/hq-remote-work-v2.md
+    evidence: a one-time home office reimbursement of up to $400
+  - doc_key: pto-leave
+    version: '3'
+    section: 7 Volunteer day
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: each employee gets one paid volunteer day per calendar year
+- id: abstain-own-playlist
+  query: Can baristas play their own playlist over the café speakers?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: dress-code
+    version: '2'
+    section: 6 Name tags and pins
+    source_uri: corpus/handbook/dress-code-v2.md
+    evidence: Staff may wear one pronoun pin and up to two other small pins on the apron
+  - doc_key: code-of-conduct
+    version: '2'
+    section: 6 Social media and the press
+    source_uri: corpus/handbook/code-of-conduct-v2.md
+    evidence: You may say you work at Halcyon, but you don't speak for it.
+- id: abstain-split-payment
+  query: Can a guest pay half in cash and half on a card?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: refunds-remakes
+    version: '3'
+    section: 2.2 Cash and gift cards
+    source_uri: corpus/operations/refunds-remakes-v3.md
+    evidence: Cash refunds are given only for purchases paid in cash.
+  - doc_key: refunds-remakes
+    version: '3'
+    section: 2.1 Approval limits
+    source_uri: corpus/operations/refunds-remakes-v3.md
+    evidence: Refunds go back to the original payment method.
+- id: abstain-holiday-party
+  query: When is this year's staff holiday party?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: pto-leave
+    version: '3'
+    section: 2.4 Peak-season blackout
+    source_uri: corpus/handbook/pto-leave-v3.md
+    evidence: From December 15 through December 31, café staff may take PTO only
+  - doc_key: policy-index
+    version: '9'
+    section: 4 Changing a document
+    source_uri: corpus/handbook/policy-index-v9.md
+    evidence: announced in the staff app at least 30 days before it takes effect
+- id: abstain-partial-curbside
+  query: How long do cold mobile orders wait on the shelf, and can we run orders out to guests' cars for curbside pickup?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: mobile-orders
+    version: '2'
+    section: 3 The pickup shelf
+    source_uri: corpus/operations/mobile-orders-v2.md
+    evidence: and cold drinks and food for 30 minutes
+  - doc_key: mobile-orders
+    version: '2'
+    section: 5 Delivery couriers
+    source_uri: corpus/operations/mobile-orders-v2.md
+    evidence: Hand an order to a courier only after they give the guest's name and the order code
+- id: abstain-oat-milk-upcharge
+  query: How much extra do we charge for oat milk?
+  asker: staff
+  expected: []
+  near_misses:
+  - doc_key: loyalty
+    version: '3'
+    section: 6 Gold status
+    source_uri: corpus/operations/loyalty-v3.md
+    evidence: Gold guests get free non-dairy milk and a free extra shot on every drink.
+  - doc_key: food-safety
+    version: '4'
+    section: 2 Holding temperatures and times
+    source_uri: corpus/operations/food-safety-v4.md
+    evidence: Oat, almond, and soy milk, opened | 41°F (5°C) or below
+- id: abstain-manager-sales-bonus
+  query: What's the quarterly bonus for café managers who hit their sales targets?
+  asker: manager
+  expected: []
+  near_misses:
+  - doc_key: hiring-pay
+    version: '3'
+    section: 3 Pay bands
+    source_uri: corpus/management/hiring-pay-v3.md
+    evidence: Café Manager | Salary | $58,000 | $72,000
+  - doc_key: hiring-pay
+    version: '3'
+    section: 7 Pay reviews
+    source_uri: corpus/management/hiring-pay-v3.md
+    evidence: Merit increases range from 0% to 4% of base pay
+- id: abstain-cafe-revenue-target
+  query: What's the 2027 revenue target for the cafés?
+  asker: exec
+  expected: []
+  near_misses:
+  - doc_key: expansion-2027
+    version: '1'
+    section: 5 Wholesale
+    source_uri: corpus/executive/expansion-2027-v1.md
+    evidence: The wholesale revenue target for 2027 is $9.5 million, up 25%.
+  - doc_key: expansion-2027
+    version: '1'
+    section: 2 New cafés
+    source_uri: corpus/executive/expansion-2027-v1.md
+    evidence: Six full cafés open in 2027

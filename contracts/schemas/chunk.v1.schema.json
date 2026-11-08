@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.chunk.v1",
+  "title": "stratafi.chunk.v1",
+  "description": "One chunk: a line of a chunks artifact (JSONL)",
+  "additionalProperties": false,
+  "properties": {
+    "chunk_id": {
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Chunk Id",
+      "type": "string"
+    },
+    "document_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Document Id",
+      "type": "string"
+    },
+    "ordinal": {
+      "minimum": 0,
+      "title": "Ordinal",
+      "type": "integer"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "index_text": {
+      "description": "Exactly what is embedded and keyword-indexed",
+      "title": "Index Text",
+      "type": "string"
+    },
+    "element_ids": {
+      "items": {
+        "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+        "type": "string"
+      },
+      "title": "Element Ids",
+      "type": "array"
+    },
+    "page_start": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Page Start"
+    },
+    "page_end": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Page End"
+    },
+    "char_start": {
+      "description": "Offset into the cleaned document's text",
+      "minimum": 0,
+      "title": "Char Start",
+      "type": "integer"
+    },
+    "char_end": {
+      "minimum": 0,
+      "title": "Char End",
+      "type": "integer"
+    },
+    "heading_path": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heading Path",
+      "type": "array"
+    },
+    "tokens": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "description": "Token counts by estimator, e.g. chars/4",
+      "title": "Tokens",
+      "type": "object"
+    },
+    "context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Added by an enrich component",
+      "title": "Context"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "chunk_id",
+    "document_id",
+    "ordinal",
+    "text",
+    "index_text",
+    "char_start",
+    "char_end"
+  ],
+  "type": "object"
+}

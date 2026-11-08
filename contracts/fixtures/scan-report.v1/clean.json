@@ -1,0 +1,12 @@
+{
+  "schema": "stratafi.scan-report.v1",
+  "document_id": "6a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+  "sha256": "1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+  "outcome": "clean",
+  "decision": "continue",
+  "checks": [
+    {"component": "scan/content-safety", "version": "1.0.0", "outcome": "clean"},
+    {"component": "scan/clamav", "version": "1.0.0", "outcome": "clean", "details": {"engine": "clamav-1.4.3", "signature_revision": "27927"}},
+    {"component": "scan/dedupe", "version": "1.0.0", "outcome": "clean"}
+  ]
+}

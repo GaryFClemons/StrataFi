@@ -1,0 +1,23 @@
+# Custom checks: Python functions in checks/tables.py, which `stratafi test run` sends with the
+# suite. The lab runs them only in its sandbox, and only where an owner turned custom checks on
+# after the sandbox's security review; elsewhere each ends as an error, custom_checks_disabled.
+#
+#   stratafi test run examples/suites/tables.yaml --junit results.xml
+schema: stratafi.test-suite.v1
+name: tables-kept-whole
+description: Tables stay in one chunk, and every parsed document is chunked.
+target:
+  pipeline: local-baseline
+corpus: halcyon@latest
+triggers:
+  - on: corpus_version_frozen
+checks:
+  - id: everything-parsed
+    stage: parse
+    metric: parse.success_rate
+    min: 1.0
+  - id: tables-whole
+    python: checks/tables.py:tables_not_split
+    timeout_s: 60
+  - id: documents-chunked
+    python: checks/tables.py:every_document_has_chunks

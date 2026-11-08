@@ -1,0 +1,24 @@
+# An example experiment: parsers for PDFs, chunkers, embedding models and rerankers over a
+# multi-format corpus, on the eval set's dev split.
+schema: stratafi.experiment.v1
+name: pdf-parsers-and-chunking
+corpus: halcyon-multiformat@3
+eval_set: {name: halcyon-retrieval, version: 2, split: dev}
+base: {pipeline: baseline-v1, retrieval: hybrid-v1}
+objective: {metric: recall@5, checkpoint: final, goal: maximize}
+constraints:
+  - {metric: latency_ms.p95, max: 800}
+  - {metric: cost_per_1k_queries_usd, max: 0.50}
+  - {metric: must_not_return_violations, max: 0}
+factors:
+  parse.route."application/pdf": [parse/pypdf, parse/docling, parse/unstructured]
+  chunk:
+    - {component: chunk/sections, params: {max_tokens: 400, min_tokens: 200, overlap: 40}}
+    - {component: chunk/recursive, params: {size: 512, overlap: 64}}
+    - {component: chunk/table-aware, params: {max_tokens: 600}}
+  embed.params.alias: [embed-local, embed-bge-base]
+  rerank: [rerank/none, {component: rerank/gateway, params: {alias: rerank-default}}]
+exclude:
+  - {chunk.component: chunk/table-aware, parse.route."application/pdf": parse/pypdf}
+strategy: grid
+budget: {max_trials: 60, max_cost_usd: 25, max_hours: 8}

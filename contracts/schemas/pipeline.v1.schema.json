@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.pipeline.v1",
+  "title": "stratafi.pipeline.v1",
+  "description": "How documents become an index (a pipeline spec)",
+  "$defs": {
+    "ChunkStage": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "default": "chunk/sections",
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "title": "Component",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "index_text": {
+          "default": "{title}\n{heading_path}\n{text}",
+          "description": "What each chunk's index text holds: {title}, {heading_path}, {section}, {context} and {text}, one per line; lines that come out empty are dropped",
+          "maxLength": 500,
+          "title": "Index Text",
+          "type": "string"
+        }
+      },
+      "title": "ChunkStage",
+      "type": "object"
+    },
+    "ComponentRef": {
+      "additionalProperties": false,
+      "description": "A component and its parameters. In a document, a bare ID means \"with defaults\".",
+      "properties": {
+        "component": {
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "title": "Component",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "component"
+      ],
+      "title": "ComponentRef",
+      "type": "object"
+    },
+    "ExtractStage": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "description": "Reads each document's stored bytes, checks its hash and detects its type",
+          "title": "Component"
+        },
+        "unpack": {
+          "description": "Unpackers applied when documents arrive",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Unpack",
+          "type": "array"
+        }
+      },
+      "title": "ExtractStage",
+      "type": "object"
+    },
+    "IndexStage": {
+      "additionalProperties": false,
+      "properties": {
+        "dense": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dense"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Keyword"
+        }
+      },
+      "title": "IndexStage",
+      "type": "object"
+    },
+    "ParseStage": {
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "description": "File type → parser. Keys are \"default\", a media type, or a short type with traits such as \"pdf[scanned]\"",
+          "title": "Route",
+          "type": "object"
+        }
+      },
+      "title": "ParseStage",
+      "type": "object"
+    },
+    "ScanStage": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "description": "Checks run in order on each raw document, before any parser opens it",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "on_outcome": {
+          "additionalProperties": {
+            "enum": [
+              "continue",
+              "flag",
+              "exclude"
+            ],
+            "type": "string"
+          },
+          "description": "What each outcome does to the document: continue, flag or exclude",
+          "propertyNames": {
+            "enum": [
+              "infected",
+              "encrypted",
+              "malformed",
+              "limit_exceeded",
+              "pii",
+              "error",
+              "duplicate"
+            ]
+          },
+          "title": "On Outcome",
+          "type": "object"
+        }
+      },
+      "title": "ScanStage",
+      "type": "object"
+    },
+    "Stages": {
+      "additionalProperties": false,
+      "properties": {
+        "extract": {
+          "$ref": "#/$defs/ExtractStage"
+        },
+        "scan": {
+          "$ref": "#/$defs/ScanStage"
+        },
+        "parse": {
+          "$ref": "#/$defs/ParseStage"
+        },
+        "clean": {
+          "description": "Cleaning rules, applied in order",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Clean",
+          "type": "array"
+        },
+        "chunk": {
+          "$ref": "#/$defs/ChunkStage"
+        },
+        "enrich": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Enrich"
+        },
+        "embed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Embed"
+        },
+        "index": {
+          "$ref": "#/$defs/IndexStage"
+        }
+      },
+      "title": "Stages",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.pipeline.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "stages": {
+      "$ref": "#/$defs/Stages"
+    }
+  },
+  "required": [
+    "schema",
+    "name"
+  ],
+  "type": "object"
+}

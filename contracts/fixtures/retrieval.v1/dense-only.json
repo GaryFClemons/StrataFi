@@ -1,0 +1,10 @@
+{
+  "schema": "stratafi.retrieval.v1",
+  "name": "dense-only",
+  "description": "Exact cosine only, no reranking",
+  "retrievers": {"dense": {"top_n": 20}, "keyword": null},
+  "fusion": {"method": "none"},
+  "candidates": 20,
+  "rerank": "rerank/none",
+  "top_k": 5
+}

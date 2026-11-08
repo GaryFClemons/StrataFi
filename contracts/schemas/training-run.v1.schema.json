@@ -1,0 +1,525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.training-run.v1",
+  "title": "stratafi.training-run.v1",
+  "description": "Everything a training run recorded: its trainer, inputs, epochs and model",
+  "$defs": {
+    "BaseModelRef": {
+      "additionalProperties": false,
+      "description": "What a model was trained from: a component and its model, revision and shape.",
+      "properties": {
+        "component": {
+          "description": "The component that runs the base, e.g. embed/gateway",
+          "title": "Component",
+          "type": "string"
+        },
+        "model": {
+          "description": "Its model: a gateway alias or a catalog ID",
+          "title": "Model",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "dims": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Embedding dimensions, for embedders",
+          "title": "Dims"
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How the dense index scores vectors",
+          "title": "Metric"
+        },
+        "license": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License"
+        }
+      },
+      "required": [
+        "component",
+        "model"
+      ],
+      "title": "BaseModelRef",
+      "type": "object"
+    },
+    "ManifestEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "stratafi_version": {
+          "title": "Stratafi Version",
+          "type": "string"
+        },
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "python": {
+          "title": "Python",
+          "type": "string"
+        },
+        "libraries": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Libraries",
+          "type": "object"
+        },
+        "os": {
+          "title": "Os",
+          "type": "string"
+        },
+        "container_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Image"
+        }
+      },
+      "required": [
+        "stratafi_version",
+        "python",
+        "os"
+      ],
+      "title": "ManifestEnvironment",
+      "type": "object"
+    },
+    "ManifestGpu": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "memory_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Bytes"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Driver"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ManifestGpu",
+      "type": "object"
+    },
+    "ManifestHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The worker host's name, if recorded",
+          "title": "Host"
+        },
+        "cpu_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Model"
+        },
+        "cpu_cores": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Cores"
+        },
+        "ram_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ram Bytes"
+        },
+        "gpus": {
+          "items": {
+            "$ref": "#/$defs/ManifestGpu"
+          },
+          "title": "Gpus",
+          "type": "array"
+        },
+        "resource_classes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resource Classes",
+          "type": "array"
+        }
+      },
+      "title": "ManifestHardware",
+      "type": "object"
+    },
+    "TrainingConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "trainer": {
+          "additionalProperties": true,
+          "description": "The trainer's component, version and parameters",
+          "title": "Trainer",
+          "type": "object"
+        },
+        "params_hash": {
+          "title": "Params Hash",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "query-adapter",
+            "embedder",
+            "reranker"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trainer",
+        "params_hash",
+        "kind"
+      ],
+      "title": "TrainingConfiguration",
+      "type": "object"
+    },
+    "TrainingExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "model_cached": {
+          "default": false,
+          "description": "An identical run's model was reused",
+          "title": "Model Cached",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "TrainingExecution",
+      "type": "object"
+    },
+    "TrainingInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "training_set": {
+          "additionalProperties": true,
+          "description": "ID, cache key, eval run, eval set (name, version, split) and counts",
+          "title": "Training Set",
+          "type": "object"
+        },
+        "base": {
+          "$ref": "#/$defs/BaseModelRef"
+        }
+      },
+      "required": [
+        "training_set",
+        "base"
+      ],
+      "title": "TrainingInputs",
+      "type": "object"
+    },
+    "TrainingMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The base model on the validation items, before training",
+          "title": "Baseline"
+        },
+        "epochs": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Epochs",
+          "type": "array"
+        },
+        "best_epoch": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Best Epoch"
+        },
+        "stopped_early": {
+          "default": false,
+          "title": "Stopped Early",
+          "type": "boolean"
+        },
+        "examples": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Train and validation",
+          "title": "Examples",
+          "type": "object"
+        }
+      },
+      "title": "TrainingMetrics",
+      "type": "object"
+    },
+    "TrainingOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key": {
+          "title": "Cache Key",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "size_bytes": {
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "files": {
+          "title": "Files",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cache_key",
+        "kind",
+        "size_bytes",
+        "files"
+      ],
+      "title": "TrainingOutput",
+      "type": "object"
+    },
+    "TrainingRunInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_by",
+        "created_at"
+      ],
+      "title": "TrainingRunInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.training-run.v1",
+      "default": "stratafi.training-run.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "training_run": {
+      "$ref": "#/$defs/TrainingRunInfo"
+    },
+    "configuration": {
+      "$ref": "#/$defs/TrainingConfiguration"
+    },
+    "inputs": {
+      "$ref": "#/$defs/TrainingInputs"
+    },
+    "environment": {
+      "$ref": "#/$defs/ManifestEnvironment"
+    },
+    "hardware": {
+      "$ref": "#/$defs/ManifestHardware"
+    },
+    "execution": {
+      "$ref": "#/$defs/TrainingExecution"
+    },
+    "metrics": {
+      "$ref": "#/$defs/TrainingMetrics"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/TrainingOutput"
+      },
+      "title": "Outputs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "training_run",
+    "configuration",
+    "inputs",
+    "environment",
+    "hardware",
+    "execution"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,15 @@
+# Successive halving: every chunking and reranker on 10 dev queries first; each
+# rung keeps at least a third of its trials for three times the queries, pruning only those
+# clearly behind the rung's leader; the last rung scores every dev query.
+schema: stratafi.experiment.v1
+name: chunking-halving
+corpus: halcyon@latest
+eval_set: {name: halcyon-retrieval}
+base: {pipeline: baseline-v1, retrieval: hybrid-v1}
+objective: {metric: recall@5}
+factors:
+  chunk.params.max_tokens: [200, 400, 800]
+  rerank: [rerank/none, {component: rerank/gateway}]
+  top_k: [3, 5, 8]
+strategy: {method: successive-halving, eta: 3, min_queries: 10, seed: 7}
+budget: {max_trials: 30}

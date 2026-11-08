@@ -1,0 +1,12 @@
+{
+  "variant": "pdf-table-images",
+  "source_manifest": "0f294a0ee6f0f7814bc43286364f5fcc1a54feae00497f61fe8e10b735b8d20f",
+  "seed": 0,
+  "dpi": 150,
+  "documents": 2,
+  "libraries": {
+    "reportlab": "5.1.0",
+    "pypdfium2": "5.14.0",
+    "pillow": "13.0.0"
+  }
+}

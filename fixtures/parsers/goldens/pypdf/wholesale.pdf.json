@@ -1,0 +1,23 @@
+{
+ "parser": "parse/pypdf",
+ "version": "1.0.0",
+ "title": "Wholesale Pricing and Ordering Guide",
+ "pages": 2,
+ "warnings": [],
+ "elements": [
+  [
+   "paragraph",
+   null,
+   1,
+   false,
+   "Wholesale Pricing and Ordering Guide\nVersion 4. Effective July 1, 2026. Owner: Head of Wholesale. Approved by the Leadership Team on\nJune 8, 2026. Replaces version 3.\n1 Wholesale accounts\nHalcyon sells roasted coffee wholesale to cafés, restaurants, grocers, and offices. A business applies\nfor a wholesale account through the wholesale portal, and the Wholesale Manager approves it. Each\naccount has one sales rep, its contact for pricing, orders, and training.\n2 Price tiers\nAn account's tier is set by its average monthly volume over the last three full months and reviewed\nevery quarter, in January, April, July, and October. A new account starts in the tier that matches the\nvolume it expects, and the first quarterly review confirms it.\nTier\nAverage monthly\nvolume\nHouse blends,\nper lb\nSingle origins,\nper lb\nFree training visits a\nyear\nTier 1:\nNeighbor\nUnder 50 lb\n$11.80\n$14.40\n1\nTier 2:\nPartner\n50 to 149 lb\n$10.60\n$13.20\n2\nTier 3:\nPreferred\n150 to 399 lb\n$9.75\n$12.30\n4\nTier 4:\nFlagship\n400 lb and up\n$9.10\n$11.60\n6\nTier prices are for coffee packed in 5 lb bags. Coffee packed in 12 oz retail bags costs $0.65 more per\nbag.\n3 Ordering\nOrder in the wholesale portal. Orders placed by 2:00 p.m. on a business day are roasted the next\nbusiness day, and delivered or shipped the business day after roasting. Orders placed after 2:00 p.m.\ncount as placed on the next business day. The minimum order is 10 lb, in any mix of coffees. Standing\nweekly orders can be set up in the portal and changed up to 2 business days before roasting.\n4 Delivery\nDelivery is free inside the Port Alder delivery zone on orders of 20 lb or more. Smaller orders inside the\nzone pay a $15 delivery charge. Orders outside the zone ship by ground carrier at cost.\n5 Payment terms\nA new account pays by card for its first two orders, and can then apply for net 30 terms. An invoice\nmore than 15 days past due puts new orders on hold until it's paid, and overdue balances are charged\n1.5% a month."
+  ],
+  [
+   "paragraph",
+   null,
+   2,
+   false,
+   "6 Discounts\nA sales rep can discount up to 5% off the account's tier price. A discount from 5% up to 10% needs the\nWholesale Manager's approval, and anything over 10% needs the Head of Wholesale. Discounts are\nreviewed with the tier each quarter.\n7 Samples and equipment\nA business considering an account can receive up to two free 12 oz sample bags. Espresso equipment\nis lent only to Tier 3 and Tier 4 accounts that sign a two-year supply agreement."
+  ]
+ ]
+}

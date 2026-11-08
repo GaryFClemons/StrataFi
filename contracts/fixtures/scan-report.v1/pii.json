@@ -1,0 +1,14 @@
+{
+  "schema": "stratafi.scan-report.v1",
+  "document_id": "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40",
+  "sha256": "9f1c0c3a6a3b0e8d7f5b4c2a1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d",
+  "outcome": "pii",
+  "decision": "exclude",
+  "checks": [
+    {"component": "scan/content-safety", "version": "1.0.0", "outcome": "clean", "reason": null, "findings": {}, "details": {}},
+    {"component": "scan/clamav", "version": "1.0.0", "outcome": "clean", "reason": null, "findings": {}, "details": {"engine": "clamav-1.4.3", "signature_revision": "27927"}},
+    {"component": "scan/pii", "version": "1.0.0", "outcome": "pii", "reason": null, "findings": {"ssn": 2, "card_number": 1}, "details": {"scanned_chars": 1834}},
+    {"component": "scan/dedupe", "version": "1.0.0", "outcome": "skipped", "reason": null, "findings": {}, "details": {}}
+  ],
+  "findings": {"ssn": 2, "card_number": 1}
+}

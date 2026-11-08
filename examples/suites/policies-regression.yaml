@@ -1,0 +1,42 @@
+# A suite to start from: the Halcyon demo corpus and its questions (fixtures/demo-corpus),
+# through the pipeline and retrieval config `scripts/local.py seed` saves. Run it with
+#
+#   stratafi test run examples/suites/policies-regression.yaml --junit results.xml
+#
+# Raise a threshold above what the lab measures and it fails: exit code 1.
+schema: stratafi.test-suite.v1
+name: policies-regression
+description: Guards the handbook's answers whenever the corpus or the pipeline changes.
+target:
+  pipeline: local-baseline
+  retrieval: local-hybrid
+corpus: halcyon@latest
+eval_set: {name: halcyon-retrieval, split: dev}
+baseline: last_passing
+triggers:
+  - on: corpus_version_frozen
+  - on: target_changed
+checks:
+  - id: recall-at-5
+    metric: recall@5
+    min: 0.3
+  - id: mrr-no-regression
+    metric: mrr@10
+    vs_baseline: {max_drop: 0.02, significance: 0.05}
+  - id: superseded-never-returned
+    metric: must_not_return_violations
+    max: 50
+  - id: everything-parsed
+    stage: parse
+    metric: parse.success_rate
+    min: 1.0
+  - id: nothing-infected
+    stage: scan
+    assert: {no_outcome: [infected]}
+  - id: pto-accrual-golden
+    query: How fast do hourly baristas build up vacation time?
+    asker: staff
+    expect: {in_top_k: 10, doc_key: pto-leave, version: "3"}
+  - id: latency
+    metric: latency_ms.p95
+    max: 5000

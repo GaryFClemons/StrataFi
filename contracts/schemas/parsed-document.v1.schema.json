@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.parsed-document.v1",
+  "title": "stratafi.parsed-document.v1",
+  "description": "A parsed document, or a cleaned one with its edits",
+  "$defs": {
+    "Edit": {
+      "additionalProperties": false,
+      "description": "One cleaning edit, as a position in the input document's text. A redaction's\n``replacement_kind`` is ``mask`` (one character per character), ``placeholder`` or ``hash``;\nthe last two keep their replacement token in ``label`` (``[SSN]``, ``[SSN:1a2b3c4d]``),\nsince it can't be rebuilt without the value. ``label`` never holds document text.",
+      "properties": {
+        "rule": {
+          "description": "The clean component's ID",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Rule",
+          "type": "string"
+        },
+        "element_id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+          "title": "Element Id",
+          "type": "string"
+        },
+        "start": {
+          "description": "Offset into the input document's text",
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "minimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "replacement_kind": {
+          "enum": [
+            "delete",
+            "space",
+            "newline",
+            "nfkc",
+            "join",
+            "mask",
+            "placeholder",
+            "hash"
+          ],
+          "title": "Replacement Kind",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "pattern": "^\\[[A-Z0-9_]{1,32}(:[0-9a-f]{8,16})?\\]$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A redaction's token: [CATEGORY] or [CATEGORY:keyed hash]",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "rule",
+        "element_id",
+        "start",
+        "end",
+        "replacement_kind"
+      ],
+      "title": "Edit",
+      "type": "object"
+    },
+    "Element": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "title",
+            "heading",
+            "paragraph",
+            "list_item",
+            "table",
+            "figure",
+            "caption",
+            "code",
+            "page_header",
+            "page_footer",
+            "page_number",
+            "other"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "maximum": 9,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Headings: 1 is the top",
+          "title": "Level"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "x0, y0, x1, y1 in points, from the page's bottom left",
+          "title": "Bbox"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TableData"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "char_start": {
+          "minimum": 0,
+          "title": "Char Start",
+          "type": "integer"
+        },
+        "char_end": {
+          "minimum": 0,
+          "title": "Char End",
+          "type": "integer"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "text",
+        "char_start",
+        "char_end"
+      ],
+      "title": "Element",
+      "type": "object"
+    },
+    "Page": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Points",
+          "title": "Width"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Points",
+          "title": "Height"
+        }
+      },
+      "required": [
+        "number"
+      ],
+      "title": "Page",
+      "type": "object"
+    },
+    "ParserRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The parse component's ID",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "params_hash": {
+          "description": "The hash of its resolved parameters",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Params Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "params_hash"
+      ],
+      "title": "ParserRef",
+      "type": "object"
+    },
+    "TableCell": {
+      "additionalProperties": false,
+      "properties": {
+        "r": {
+          "minimum": 0,
+          "title": "R",
+          "type": "integer"
+        },
+        "c": {
+          "minimum": 0,
+          "title": "C",
+          "type": "integer"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "header": {
+          "default": false,
+          "title": "Header",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "r",
+        "c",
+        "text"
+      ],
+      "title": "TableCell",
+      "type": "object"
+    },
+    "TableData": {
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "minimum": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "cols": {
+          "minimum": 0,
+          "title": "Cols",
+          "type": "integer"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/TableCell"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rows",
+        "cols"
+      ],
+      "title": "TableData",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.parsed-document.v1",
+      "default": "stratafi.parsed-document.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "document_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Document Id",
+      "type": "string"
+    },
+    "parser": {
+      "$ref": "#/$defs/ParserRef"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
+    "media_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Media Type",
+      "type": "string"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/Page"
+      },
+      "title": "Pages",
+      "type": "array"
+    },
+    "elements": {
+      "items": {
+        "$ref": "#/$defs/Element"
+      },
+      "title": "Elements",
+      "type": "array"
+    },
+    "text": {
+      "description": "The canonical concatenation that element offsets point into",
+      "title": "Text",
+      "type": "string"
+    },
+    "warnings": {
+      "description": "Codes, never text",
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z]{2,3}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The document's main language (ISO 639-1), when clean/language tagged it",
+      "title": "Language"
+    },
+    "edits": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Edit"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Cleaned documents only: the edits that made them",
+      "title": "Edits"
+    }
+  },
+  "required": [
+    "document_id",
+    "parser",
+    "media_type",
+    "text"
+  ],
+  "type": "object"
+}

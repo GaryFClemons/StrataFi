@@ -1,0 +1,57 @@
+[project]
+name = "stratafi-components"
+version = "0.1.0"
+description = "Stratafi's built-in pipeline components. Heavy libraries sit behind extras."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "stratafi-core",
+    "defusedxml>=0.7.1",
+    "httpx2>=2.16",
+    # The default parse route's office and web formats (DOCX, PPTX, XLSX, HTML): parse/markitdown
+    # (MIT).
+    "markitdown[docx,pptx,xlsx]>=0.1",
+    "numpy>=2.1",
+    # unpack/email reads Outlook .msg files (BSD-2-Clause).
+    "olefile>=0.47",
+    "pypdf>=6.0",
+    # index/bm25's and chunk/semantic's English stemmer (BSD-3-Clause).
+    "snowballstemmer>=3.0",
+    # index/postgres-fts and index/pgvector-hnsw keep their tables in Stratafi's database.
+    "sqlalchemy>=2.0.36",
+    "tiktoken>=0.9",
+]
+
+[project.optional-dependencies]
+# Heavy or optional parsers. A component whose extra is missing stays in the
+# registry, says which extra it needs, and refuses to run (ComponentError "extra_missing").
+pdfplumber = ["pdfplumber>=0.11"]
+# markitdown is a regular dependency now; the extra stays so `--extra markitdown` still works.
+markitdown = ["markitdown[docx,pptx,xlsx]>=0.1"]
+# OCR: RapidOCR (Apache-2.0, models in the wheel) and Tesseract through pytesseract (the
+# tesseract binary is a system install); pages render with pypdfium2.
+ocr = ["rapidocr-onnxruntime>=1.4.4,<2", "pytesseract>=0.3.13", "pypdfium2>=4.30", "pillow>=11.0"]
+# Layout parsers that download models at first use; Linux only, like every heavy extra.
+docling = ["docling>=2.15 ; sys_platform == 'linux'"]
+unstructured = ["unstructured[docx,pptx,xlsx]>=0.16 ; sys_platform == 'linux'"]
+# In-process embedding and reranking models (lab only): sentence-transformers on torch.
+sentence-transformers = ["sentence-transformers>=3.0"]
+# UMAP projections on the Embed screen (BSD-3-Clause); PCA needs nothing.
+umap = ["umap-learn>=0.5"]
+# Hugging Face tokenizers, for hf:<model> token estimates and exact truncation checks.
+hf = ["tokenizers>=0.20"]
+# AWS Textract through boto3 (credentials from the environment, as boto3 finds them).
+textract = ["boto3>=1.35"]
+# AGPL-3.0: never installed by default, and gated by licenses.allowed.
+pymupdf4llm = ["pymupdf4llm>=0.0.17"]
+
+[tool.uv.sources]
+stratafi-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_components"]

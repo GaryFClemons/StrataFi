@@ -1,0 +1,61 @@
+# An example suite: a knowledge profile guarded on the Halcyon demo set's dev split, against
+# its previous version.
+schema: stratafi.test-suite.v1
+name: policies-regression
+description: Guards policy answers whenever the corpus or the profile changes.
+target:
+  profile: kp-policies@current
+corpus: halcyon@latest
+eval_set: {name: halcyon-retrieval, version: latest, split: dev}
+baseline: {profile: kp-policies@previous}
+time_zone: America/Chicago
+# YAML 1.1 reads a bare `on` key as true; Stratafi takes either spelling, and the JSON Schema
+# needs the quoted one.
+triggers:
+  - "on": corpus_version_frozen
+  - "on": target_changed
+  - schedule: "17 6 * * 1-5"
+checks:
+  - id: recall-at-5
+    metric: recall@5
+    min: 0.85
+  - id: mrr-no-regression
+    metric: mrr@10
+    vs_baseline: {max_drop: 0.02, significance: 0.05}
+  - id: superseded-never-returned
+    metric: must_not_return_violations
+    max: 0
+  - id: avoid-versions
+    metric: avoid_violations
+    max: 0
+  - id: pdf-parse-success
+    stage: parse
+    where: {file_type: application/pdf}
+    metric: parse.success_rate
+    min: 0.98
+  - id: evidence-findable
+    stage: parse
+    metric: parse.evidence_findability
+    min: 0.97
+  - id: no-truncated-chunks
+    stage: chunk
+    metric: chunk.share_over_embed_limit
+    max: 0
+  - id: no-pii-in-index
+    stage: chunk
+    assert: no_findings
+    detector: scan/pii
+    categories: [ssn, card_number, iban]
+  - id: pto-accrual-golden
+    query: How fast do hourly baristas build up vacation time?
+    asker: {roles: [staff], groups: [all-staff]}
+    expect: {in_top_k: 3, doc_key: pto-leave, version: "3", contains: "1 hour of PTO for every 30 hours worked"}
+  - id: latency
+    metric: latency_ms.p95
+    max: 800
+  - id: corpus-changes
+    type: data_change
+    max: {removed: 0, unparseable: 0}
+  - id: embedding-unchanged
+    allow_change: false
+outputs: [json, junit, markdown]

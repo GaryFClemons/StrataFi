@@ -1,0 +1,791 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.knowledge-profile.v1",
+  "title": "stratafi.knowledge-profile.v1",
+  "description": "A winning configuration with its evidence, compatibility and review",
+  "$defs": {
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "title": "By",
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approved",
+            "rejected"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "self_review": {
+          "default": false,
+          "description": "The version's author decided it themselves",
+          "title": "Self Review",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "by",
+        "at",
+        "decision"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "ChunkStage": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "default": "chunk/sections",
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "title": "Component",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "index_text": {
+          "default": "{title}\n{heading_path}\n{text}",
+          "description": "What each chunk's index text holds: {title}, {heading_path}, {section}, {context} and {text}, one per line; lines that come out empty are dropped",
+          "maxLength": 500,
+          "title": "Index Text",
+          "type": "string"
+        }
+      },
+      "title": "ChunkStage",
+      "type": "object"
+    },
+    "ComponentRef": {
+      "additionalProperties": false,
+      "description": "A component and its parameters. In a document, a bare ID means \"with defaults\".",
+      "properties": {
+        "component": {
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "title": "Component",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "component"
+      ],
+      "title": "ComponentRef",
+      "type": "object"
+    },
+    "DenseRetrieverSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "top_n": {
+          "default": 50,
+          "description": "Results each retriever returns",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Top N",
+          "type": "integer"
+        },
+        "adapter": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A trained query adapter's model ID, applied to query vectors",
+          "title": "Adapter"
+        }
+      },
+      "title": "DenseRetrieverSettings",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "experiment": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ID, name, hash",
+          "title": "Experiment"
+        },
+        "trial": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ID, ordinal, factor values",
+          "title": "Trial"
+        },
+        "corpus": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Corpus"
+        },
+        "eval_set": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eval Set"
+        },
+        "objective": {
+          "additionalProperties": true,
+          "description": "Metric, rule, checkpoint and goal",
+          "title": "Objective",
+          "type": "object"
+        },
+        "dev": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResultRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "test": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResultRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "test_read": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Which read of the test split",
+          "title": "Test Read"
+        },
+        "guardrails": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Its group against the leader, equivalence, recommendation",
+          "title": "Guardrails"
+        }
+      },
+      "required": [
+        "objective"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "ExtractStage": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "description": "Reads each document's stored bytes, checks its hash and detects its type",
+          "title": "Component"
+        },
+        "unpack": {
+          "description": "Unpackers applied when documents arrive",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Unpack",
+          "type": "array"
+        }
+      },
+      "title": "ExtractStage",
+      "type": "object"
+    },
+    "Filters": {
+      "additionalProperties": false,
+      "properties": {
+        "collections": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 100,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collections"
+        },
+        "current_only": {
+          "default": true,
+          "description": "Only versions in effect on the as-of date",
+          "title": "Current Only",
+          "type": "boolean"
+        },
+        "statuses": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Statuses"
+        }
+      },
+      "title": "Filters",
+      "type": "object"
+    },
+    "Fusion": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "default": "rrf",
+          "enum": [
+            "rrf",
+            "weighted",
+            "none"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "k": {
+          "default": 60,
+          "description": "RRF's k",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "alpha": {
+          "default": 0.5,
+          "description": "Weighted fusion: the dense weight",
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Alpha",
+          "type": "number"
+        }
+      },
+      "title": "Fusion",
+      "type": "object"
+    },
+    "IndexStage": {
+      "additionalProperties": false,
+      "properties": {
+        "dense": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dense"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Keyword"
+        }
+      },
+      "title": "IndexStage",
+      "type": "object"
+    },
+    "ParseStage": {
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "description": "File type → parser. Keys are \"default\", a media type, or a short type with traits such as \"pdf[scanned]\"",
+          "title": "Route",
+          "type": "object"
+        }
+      },
+      "title": "ParseStage",
+      "type": "object"
+    },
+    "PipelineSpec": {
+      "additionalProperties": false,
+      "description": "``stratafi.pipeline.v1``.",
+      "properties": {
+        "schema": {
+          "const": "stratafi.pipeline.v1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "stages": {
+          "$ref": "#/$defs/Stages"
+        }
+      },
+      "required": [
+        "schema",
+        "name"
+      ],
+      "title": "PipelineSpec",
+      "type": "object"
+    },
+    "ResultRef": {
+      "additionalProperties": false,
+      "description": "The objective on one split: its mean and 95% interval, and the eval run behind it.",
+      "properties": {
+        "mean": {
+          "title": "Mean",
+          "type": "number"
+        },
+        "low": {
+          "title": "Low",
+          "type": "number"
+        },
+        "high": {
+          "title": "High",
+          "type": "number"
+        },
+        "n": {
+          "title": "N",
+          "type": "integer"
+        },
+        "eval_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eval Run Id"
+        }
+      },
+      "required": [
+        "mean",
+        "low",
+        "high",
+        "n"
+      ],
+      "title": "ResultRef",
+      "type": "object"
+    },
+    "RetrievalConfig": {
+      "additionalProperties": false,
+      "description": "``stratafi.retrieval.v1``.",
+      "properties": {
+        "schema": {
+          "const": "stratafi.retrieval.v1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "retrievers": {
+          "$ref": "#/$defs/Retrievers"
+        },
+        "fusion": {
+          "$ref": "#/$defs/Fusion"
+        },
+        "candidates": {
+          "default": 50,
+          "description": "Fused results the reranker sees",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Candidates",
+          "type": "integer"
+        },
+        "filters": {
+          "$ref": "#/$defs/Filters"
+        },
+        "rerank": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Rerank"
+        },
+        "top_k": {
+          "default": 8,
+          "description": "Passages returned",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Top K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema",
+        "name"
+      ],
+      "title": "RetrievalConfig",
+      "type": "object"
+    },
+    "RetrieverSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "top_n": {
+          "default": 50,
+          "description": "Results each retriever returns",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Top N",
+          "type": "integer"
+        }
+      },
+      "title": "RetrieverSettings",
+      "type": "object"
+    },
+    "Retrievers": {
+      "additionalProperties": false,
+      "properties": {
+        "dense": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DenseRetrieverSettings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RetrieverSettings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "title": "Retrievers",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "approved",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "approvals": {
+          "items": {
+            "$ref": "#/$defs/Approval"
+          },
+          "title": "Approvals",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "Review",
+      "type": "object"
+    },
+    "ScanStage": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "description": "Checks run in order on each raw document, before any parser opens it",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "on_outcome": {
+          "additionalProperties": {
+            "enum": [
+              "continue",
+              "flag",
+              "exclude"
+            ],
+            "type": "string"
+          },
+          "description": "What each outcome does to the document: continue, flag or exclude",
+          "propertyNames": {
+            "enum": [
+              "infected",
+              "encrypted",
+              "malformed",
+              "limit_exceeded",
+              "pii",
+              "error",
+              "duplicate"
+            ]
+          },
+          "title": "On Outcome",
+          "type": "object"
+        }
+      },
+      "title": "ScanStage",
+      "type": "object"
+    },
+    "Stages": {
+      "additionalProperties": false,
+      "properties": {
+        "extract": {
+          "$ref": "#/$defs/ExtractStage"
+        },
+        "scan": {
+          "$ref": "#/$defs/ScanStage"
+        },
+        "parse": {
+          "$ref": "#/$defs/ParseStage"
+        },
+        "clean": {
+          "description": "Cleaning rules, applied in order",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ComponentRef"
+              },
+              {
+                "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Clean",
+          "type": "array"
+        },
+        "chunk": {
+          "$ref": "#/$defs/ChunkStage"
+        },
+        "enrich": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Enrich"
+        },
+        "embed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRef"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Embed"
+        },
+        "index": {
+          "$ref": "#/$defs/IndexStage"
+        }
+      },
+      "title": "Stages",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.knowledge-profile.v1",
+      "default": "stratafi.knowledge-profile.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "pipeline": {
+      "$ref": "#/$defs/PipelineSpec"
+    },
+    "retrieval": {
+      "$ref": "#/$defs/RetrievalConfig"
+    },
+    "models": {
+      "additionalProperties": true,
+      "description": "Aliases and revisions",
+      "title": "Models",
+      "type": "object"
+    },
+    "evidence": {
+      "$ref": "#/$defs/Evidence"
+    },
+    "created_by": {
+      "title": "Created By",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "review": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Review"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Who approved it, at export; not part of its hash"
+    }
+  },
+  "required": [
+    "name",
+    "pipeline",
+    "retrieval",
+    "evidence",
+    "created_by",
+    "created_at"
+  ],
+  "type": "object"
+}

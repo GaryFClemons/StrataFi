@@ -1,0 +1,9 @@
+# Files Prettier leaves alone.
+
+# Generated code: the generators' --check modes compare text, so it keeps their formatting.
+**/generated/
+*.generated.*
+
+# Written by npm and by the build.
+package-lock.json
+dist/

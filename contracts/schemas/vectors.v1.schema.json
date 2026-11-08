@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.vectors.v1",
+  "title": "stratafi.vectors.v1",
+  "description": "The sidecar of a vectors array: chunks and model",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.vectors.v1",
+      "default": "stratafi.vectors.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "chunk_ids": {
+      "description": "Row i is chunk_ids[i]'s vector",
+      "items": {
+        "type": "string"
+      },
+      "title": "Chunk Ids",
+      "type": "array"
+    },
+    "component": {
+      "description": "The embed component",
+      "title": "Component",
+      "type": "string"
+    },
+    "model": {
+      "description": "The model alias, or the fake's name",
+      "title": "Model",
+      "type": "string"
+    },
+    "served_model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What the gateway says it ran",
+      "title": "Served Model"
+    },
+    "revision": {
+      "description": "X-Model-Revision",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "dims": {
+      "description": "Dimensions after any truncation",
+      "minimum": 1,
+      "title": "Dims",
+      "type": "integer"
+    },
+    "normalized": {
+      "title": "Normalized",
+      "type": "boolean"
+    },
+    "dtype": {
+      "default": "float32",
+      "description": "As stored: int8 is round(x * 127); binary packs sign bits",
+      "enum": [
+        "float32",
+        "float16",
+        "int8",
+        "binary"
+      ],
+      "title": "Dtype",
+      "type": "string"
+    },
+    "full_dims": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What the model returned, before truncation",
+      "title": "Full Dims"
+    },
+    "prefix": {
+      "default": "",
+      "description": "Prepended to each index text before embedding",
+      "title": "Prefix",
+      "type": "string"
+    },
+    "tokens": {
+      "default": 0,
+      "description": "Tokens the provider reported",
+      "minimum": 0,
+      "title": "Tokens",
+      "type": "integer"
+    },
+    "truncated_inputs": {
+      "default": 0,
+      "description": "Texts over the model's input limit",
+      "minimum": 0,
+      "title": "Truncated Inputs",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "chunk_ids",
+    "component",
+    "model",
+    "revision",
+    "dims",
+    "normalized"
+  ],
+  "type": "object"
+}

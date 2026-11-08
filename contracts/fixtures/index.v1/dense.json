@@ -1,0 +1,14 @@
+{
+  "schema": "stratafi.index.v1",
+  "kind": "dense",
+  "component": "index/exact",
+  "version": "1.0.0",
+  "params": {"metric": "cosine"},
+  "chunk_ids": ["5e0f6a2c9b1d4e3f8a7b6c5d4e3f2a1b", "6f1a7b3d0c2e5f4a9b8c7d6e5f4a3b2c"],
+  "document_ids": ["0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40", "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40"],
+  "chunks": ["9f1c0c3a6a3b0e8d7f5b4c2a1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d"],
+  "model": "embed-local",
+  "revision": "3f2a1b0c9d8e7f6a",
+  "dims": 768,
+  "metric": "cosine"
+}

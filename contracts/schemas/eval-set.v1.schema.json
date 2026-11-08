@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.eval-set.v1",
+  "title": "stratafi.eval-set.v1",
+  "description": "Questions with known evidence; also reads the retrieval YAML format",
+  "$defs": {
+    "Asker": {
+      "additionalProperties": false,
+      "description": "Who asks: what ACL filtering sees of a person.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A name in the set's askers table",
+          "title": "Name"
+        },
+        "user": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Their user ID, for ACLs that list users",
+          "title": "User"
+        },
+        "roles": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Roles",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "type": "string"
+          },
+          "maxItems": 256,
+          "title": "Groups",
+          "type": "array"
+        }
+      },
+      "title": "Asker",
+      "type": "object"
+    },
+    "DocRef": {
+      "additionalProperties": false,
+      "description": "A document, or one version of it: what ``avoid`` and ``must_not_return`` name.",
+      "properties": {
+        "doc_key": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+          "title": "Doc Key",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None: every version",
+          "title": "Version"
+        }
+      },
+      "required": [
+        "doc_key"
+      ],
+      "title": "DocRef",
+      "type": "object"
+    },
+    "EvalDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "k": {
+          "default": 5,
+          "description": "The cutoff the set's own hit rule uses",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "asker": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Asker"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The asker of items that name none",
+          "title": "Asker"
+        }
+      },
+      "title": "EvalDefaults",
+      "type": "object"
+    },
+    "EvalItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "query": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "asker": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Asker"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A name from askers, or an asker; the set's default if none",
+          "title": "Asker"
+        },
+        "expected": {
+          "description": "Gold evidence; empty means the answer is not in the corpus",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 100,
+          "title": "Expected",
+          "type": "array"
+        },
+        "avoid": {
+          "description": "Must not rank above the first hit",
+          "items": {
+            "$ref": "#/$defs/DocRef"
+          },
+          "maxItems": 100,
+          "title": "Avoid",
+          "type": "array"
+        },
+        "must_not_return": {
+          "description": "Must never be returned",
+          "items": {
+            "$ref": "#/$defs/DocRef"
+          },
+          "maxItems": 100,
+          "title": "Must Not Return",
+          "type": "array"
+        },
+        "near_misses": {
+          "description": "An abstention item's closest passages, which a good answer cites",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 100,
+          "title": "Near Misses",
+          "type": "array"
+        },
+        "reference_answer": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Answer"
+        },
+        "tags": {
+          "items": {
+            "pattern": "^[a-z0-9][a-z0-9._:-]{0,63}$",
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Tags",
+          "type": "array"
+        },
+        "split": {
+          "anyOf": [
+            {
+              "enum": [
+                "dev",
+                "test"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Split"
+        }
+      },
+      "required": [
+        "id",
+        "query"
+      ],
+      "title": "EvalItem",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Gold evidence: a document version, a section, and a phrase from it.",
+      "properties": {
+        "doc_key": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+          "title": "Doc Key",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None: any version",
+          "title": "Version"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": [
+        "doc_key"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.eval-set.v1",
+      "default": "stratafi.eval-set.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "tenant": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The source's tenant",
+      "title": "Tenant"
+    },
+    "as_of": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "\"Today\" for effective-date filters",
+      "title": "As Of"
+    },
+    "defaults": {
+      "$ref": "#/$defs/EvalDefaults"
+    },
+    "askers": {
+      "maxProperties": 256,
+      "patternProperties": {
+        "^[a-z][a-z0-9_-]{0,63}$": {
+          "$ref": "#/$defs/Asker"
+        }
+      },
+      "title": "Askers",
+      "type": "object"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/EvalItem"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "items"
+  ],
+  "type": "object"
+}

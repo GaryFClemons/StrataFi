@@ -1,0 +1,96 @@
+﻿Food Safety and Allergen Standard
+=================================
+
+Version 4. Effective June 1, 2026. Owner: Quality and Food Safety Manager.
+Approved by the Leadership Team on May 11, 2026. Replaces version 3.
+
+1 Scope
+-------
+
+This standard applies to every café and to the roastery's tasting room. It
+covers how milk, food, and prepared drink ingredients are stored and held,
+temperature checks, allergens, handwashing, and when a sick employee stays
+home. Where the local health code is stricter, follow the health code.
+
+2 Holding temperatures and times
+--------------------------------
+
+Cold items are held at 41°F (5°C) or below, and hot items at 135°F (57°C) or
+above. Label every opened or prepared item with the date and time it was
+opened or made, and throw it out when its time runs out.
+
+| Item | Hold at | Discard |
+| --- | --- | --- |
+| Dairy milk and cream, opened | 41°F (5°C) or below | 4 days after opening, or the printed date if sooner |
+| Oat, almond, and soy milk, opened | 41°F (5°C) or below | 7 days after opening, or the printed date if sooner |
+| Milk left in a steaming pitcher | Not held | After each drink; never re-steam |
+| Cold brew concentrate | 41°F (5°C) or below | 7 days after the steep ends |
+| Brewed iced tea | 41°F (5°C) or below | 24 hours after brewing |
+| House-made whipped cream | 41°F (5°C) or below | 48 hours after making |
+| House-made syrups | 41°F (5°C) or below | 14 days after making |
+| Cut fruit and yogurt cups | 41°F (5°C) or below | 48 hours after prep |
+| Breakfast sandwiches in the warmer | 135°F (57°C) or above | 4 hours after reaching temperature |
+| Pastries in the case | Room temperature | At close: donate or log as waste |
+
+3 Heating sandwiches
+--------------------
+
+Heat breakfast sandwiches in the oven to an internal temperature of 165°F
+(74°C), checked with a probe thermometer, before they go in the warmer. Record
+one probe reading per batch on the temperature log. A sandwich that drops
+below 135°F (57°C) in the warmer is thrown out, not reheated.
+
+4 Fridge and freezer checks
+---------------------------
+
+Read every fridge and freezer thermometer at opening, at 2:00 p.m., and at
+close, and record the readings on the temperature log. Freezers read 0°F
+(-18°C) or below. If a fridge reads above 41°F (5°C), check it again after 30
+minutes. If it's still above 41°F (5°C), move everything to another fridge,
+call the Facilities help desk, and tell the Café Manager. Throw out any milk
+or food that has been above 41°F (5°C) for more than 4 hours, or for an
+unknown length of time.
+
+5 Allergens
+-----------
+
+5.1 What we track
+
+Halcyon tracks the nine major allergens: milk, eggs, fish, shellfish, tree
+nuts, peanuts, wheat, soy, and sesame. Almond milk and the hazelnut and
+pistachio syrups contain tree nuts. Oat milk is not certified gluten-free.
+Each pastry's allergens are printed on its label and listed in the allergen
+binder.
+
+5.2 Making an allergy order
+
+When a guest mentions an allergy, add the ALLERGY modifier in the register so
+it prints on the cup label. The barista making the drink washes their hands,
+takes a pitcher from the clean rack, purges and wipes the steam wand before
+steaming, and uses the purple allergen-safe blender jar for blended drinks.
+Tell the guest that our cafés handle all nine allergens and we can't promise
+any item is free of them.
+
+5.3 If a guest has a reaction
+
+Call 911 if the guest has trouble breathing, swelling of the face or throat,
+or feels faint. Don't give the guest any medication, though they may use their
+own epinephrine injector. Tell the Café Manager, keep the cup and any
+packaging, and file an incident report in the safety portal within 24 hours.
+
+6 Handwashing and gloves
+------------------------
+
+Wash your hands for at least 20 seconds at the start of each shift, after
+breaks, after handling raw eggs, cash, or trash, and before putting on gloves.
+Wear gloves to handle ready-to-eat food that won't be cooked. Change gloves
+every 4 hours, and whenever they tear or you change tasks.
+
+7 Illness
+---------
+
+An employee with vomiting, diarrhea, or jaundice doesn't work until 48 hours
+after the symptoms stop. An employee with a sore throat and a fever works only
+away from food and drinks, such as on the register, until the fever is gone.
+Tell the person in charge before the shift; paid sick time covers the missed
+shifts.

@@ -1,0 +1,179 @@
+{
+  "schema": "stratafi.run-manifest.v1",
+  "run": {
+    "id": "5b7d2c1a-8e3f-4a6b-9c0d-1e2f3a4b5c6d",
+    "kind": "pipeline",
+    "mode": "interactive",
+    "until": "parse",
+    "rerun_of": null,
+    "rerun_from": null,
+    "created_by": "u-tenant0-editor",
+    "created_at": "2026-10-30T12:00:00Z"
+  },
+  "configuration": {
+    "pipeline": {
+      "schema": "stratafi.pipeline.v1",
+      "name": "baseline-v1",
+      "description": "",
+      "stages": {
+        "chunk": {
+          "component": "chunk/sections",
+          "params": {
+            "max_tokens": 400,
+            "min_tokens": 200,
+            "overlap": 0,
+            "token_estimator": "chars/4",
+            "max_chunks": 10000
+          },
+          "index_text": "{title}\n{heading_path}\n{text}"
+        }
+      }
+    },
+    "pipeline_hash": "a1c6ed202fac61d558cb9db8fa961d05f356fc548d61c0b71401d06de63b8817",
+    "pipeline_ref": {
+      "name": "baseline-v1",
+      "version": 1
+    },
+    "retrieval": null,
+    "retrieval_hash": null,
+    "components": [
+      {
+        "path": "stages.parse.route.md",
+        "id": "parse/markdown",
+        "version": "1.0.0",
+        "params": {},
+        "params_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      }
+    ]
+  },
+  "inputs": {
+    "corpus": {
+      "corpus_id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+      "corpus_version_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "version": 1,
+      "manifest_hash": "1cf6bdfbd2233ef2cac2b93b128e04c357a4b872780813d0c8f05cc83af43959"
+    },
+    "documents": [
+      {
+        "entry": "handbook/tips-v3.md",
+        "document_id": "0f9d6a9e-2a51-4b6e-9a3f-5d2c1e7b8a40",
+        "sha256": "f4b7f8a319bf5101dd02678b1153b07b7754ac2eda6ddee58b7b406315ad6df3",
+        "size_bytes": 4096,
+        "media_type": "text/markdown",
+        "traits": {
+          "pages": null
+        }
+      }
+    ],
+    "sample": {
+      "size": 1,
+      "seed": 7,
+      "entries": null
+    },
+    "eval_set": null
+  },
+  "models": [
+    {
+      "role": "embed",
+      "component": "embed/gateway",
+      "alias": "embed-default",
+      "served_model": "fake-embed",
+      "revision": "3f2a1b0c9d8e7f6a",
+      "dimensions": 384,
+      "dtype": "float32",
+      "prefixes": {},
+      "tokenizer": null
+    }
+  ],
+  "environment": {
+    "stratafi_version": "0.1.0",
+    "commit": "7e4b496",
+    "python": "3.12.15",
+    "libraries": {
+      "pypdf": "6.21.2",
+      "numpy": "2.3.4"
+    },
+    "os": "Linux-6.18-x86_64",
+    "container_image": null
+  },
+  "hardware": {
+    "host": "worker-1",
+    "cpu_model": "Intel(R) Xeon(R)",
+    "cpu_cores": 4,
+    "ram_bytes": 16000000000,
+    "gpus": [],
+    "resource_classes": [
+      "cpu",
+      "io"
+    ]
+  },
+  "execution": {
+    "status": "succeeded",
+    "started_at": "2026-10-30T12:00:01Z",
+    "finished_at": "2026-10-30T12:00:04Z",
+    "duration_ms": 3000.0,
+    "error_code": null,
+    "stages": [
+      {
+        "stage": "parse",
+        "tasks": 1,
+        "succeeded": 1,
+        "cached": 0,
+        "skipped": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "duration_ms": 850.0,
+        "throughput_per_second": 1.18,
+        "metrics": {
+          "pages": 3
+        }
+      }
+    ],
+    "tasks": [
+      {
+        "stage": "parse",
+        "entry": "handbook/tips-v3.md",
+        "component": "parse/markdown",
+        "component_version": "1.0.0",
+        "cache_key": "b25ac62096d84fd55cee44957f7316bad3b8f8f4c51cd9dd4d47324b6aa042b6",
+        "status": "succeeded",
+        "cache_hit": false,
+        "attempts": 1,
+        "started_at": "2026-10-30T12:00:02Z",
+        "finished_at": "2026-10-30T12:00:03Z",
+        "duration_ms": 850.0,
+        "peak_memory_bytes": 52000000,
+        "error_code": null,
+        "metrics": {
+          "elements": 42
+        }
+      }
+    ]
+  },
+  "cost": {
+    "providers": {
+      "model_gateway": {
+        "calls": 0,
+        "tokens": 0
+      }
+    },
+    "currency": "USD",
+    "estimated": 0.0,
+    "price_table": {
+      "model_gateway": 0.0
+    }
+  },
+  "egress": [],
+  "outputs": [
+    {
+      "cache_key": "b25ac62096d84fd55cee44957f7316bad3b8f8f4c51cd9dd4d47324b6aa042b6",
+      "kind": "parsed",
+      "stage": "parse",
+      "size_bytes": 20480,
+      "summary": {
+        "elements": 42,
+        "pages": 3
+      }
+    }
+  ]
+}

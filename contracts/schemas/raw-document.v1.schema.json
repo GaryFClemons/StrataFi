@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.raw-document.v1",
+  "title": "stratafi.raw-document.v1",
+  "description": "A document's stored bytes and what they are: the extract stage's output",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.raw-document.v1",
+      "default": "stratafi.raw-document.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "document_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Document Id",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "extension": {
+      "description": "From the entry's name, e.g. .pdf",
+      "maxLength": 32,
+      "title": "Extension",
+      "type": "string"
+    },
+    "media_type": {
+      "description": "What the bytes are",
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Media Type",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The sniffed kind, e.g. pdf",
+      "maxLength": 32,
+      "minLength": 1,
+      "title": "Kind",
+      "type": "string"
+    },
+    "declared_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "What the extension says",
+      "title": "Declared Type"
+    },
+    "mismatch": {
+      "description": "The bytes disagree with the extension",
+      "title": "Mismatch",
+      "type": "boolean"
+    },
+    "known": {
+      "description": "The extension is one Stratafi lists",
+      "title": "Known",
+      "type": "boolean"
+    },
+    "traits": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Traits",
+      "type": "object"
+    }
+  },
+  "required": [
+    "document_id",
+    "sha256",
+    "size_bytes",
+    "extension",
+    "media_type",
+    "kind",
+    "mismatch",
+    "known"
+  ],
+  "type": "object"
+}

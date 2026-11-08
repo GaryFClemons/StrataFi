@@ -1,0 +1,16 @@
+{
+  "schema": "stratafi.eval-set.v1",
+  "name": "brew-questions",
+  "items": [
+    {
+      "id": "batch-brew-hold",
+      "query": "How long can batch brew sit in its thermal server?",
+      "expected": [
+        {
+          "doc_key": "brew-standards",
+          "evidence": "no more than 30 minutes"
+        }
+      ]
+    }
+  ]
+}

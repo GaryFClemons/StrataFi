@@ -1,0 +1,121 @@
+{
+ "parser": "parse/pdfplumber",
+ "version": "1.0.0",
+ "title": "Tip Policy",
+ "pages": 1,
+ "warnings": [],
+ "elements": [
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "Tip Policy"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Version 3. Effective July 1, 2025. Owner: Controller. Approved by the Leadership Team on June 9,\n2025. Replaces version 2."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "1 Who shares in tips"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Tips belong to the café crew that served the guest. Baristas of every level, Shift Leads, and café porters\nshare in the tip pool. Café Managers, Assistant Café Managers, and District Managers never share in\ntips, even on shifts when they work the bar. Staff borrowed from another café share in the pool of the\ncafé where they worked that shift."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "2 Card and app tips"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Tips left on card payments, in the Halcyon app, and on mobile orders are pooled by café for each week,\nMonday through Sunday. They're paid with the regular paycheck that covers that week and itemized on\nthe pay statement."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "3 Cash tips 3.1 Counting the tip jar"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "At close, two people count the tip jar together: the closing Shift Lead and one other closer. They record\nthe total on the tip log, both sign it, and seal the cash in a tip envelope that goes in the safe. The tip jar\nis never emptied during a shift, except to move it out of a guest's reach."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "3.2 Paying out cash tips"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "The Café Manager pays out the week's cash tips in cash every Tuesday, using the shares printed from\nthe tip calculator. Shares are rounded down to the whole dollar, and the leftover cents roll into the next\nweek's pool. Each person signs for their share. Anyone who isn't working on Tuesday collects their\nenvelope from the Café Manager within 14 days; after that, it's added to their next paycheck instead."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "4 Dividing the pool"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Each person's share is proportional to the hours they worked at that café during the week. Paid breaks\nand training shifts count as hours worked. PTO, sick time, and meetings away from the café don't.\nEvery eligible role earns the same share per hour: Shift Leads are paid for leading through their hourly\nrate, not through a bigger cut of the tips."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "5 Catering orders"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Catering orders carry a 12% service charge. The service charge is café revenue, not a tip. Any tip a\ncatering customer adds on top of it goes to the pool of the café that prepared the order."
+  ],
+  [
+   "heading",
+   1,
+   1,
+   true,
+   "6 Questions and corrections"
+  ],
+  [
+   "paragraph",
+   null,
+   1,
+   true,
+   "Raise a question about a tip payout with the Café Manager within 30 days. If it isn't settled within 7\ndays, contact the People Team. Corrections are made on the next paycheck. Taking money from the tip\njar or the pool is theft and is grounds for termination."
+  ]
+ ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "stratafi.test-suite.v1",
+  "name": "parse-smoke",
+  "target": {"pipeline": "baseline-v1@latest"},
+  "corpus": "halcyon",
+  "checks": [
+    {"id": "all-parsed", "stage": "parse", "assert": "all_succeeded"},
+    {"id": "nothing-infected", "stage": "scan", "assert": {"no_outcome": ["infected", "encrypted"]}}
+  ]
+}

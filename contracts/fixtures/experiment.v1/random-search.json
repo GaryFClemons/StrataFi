@@ -1,0 +1,16 @@
+{
+  "schema": "stratafi.experiment.v1",
+  "name": "chunk-sizes",
+  "corpus": "halcyon@latest",
+  "eval_set": {"name": "halcyon-retrieval"},
+  "base": {"pipeline": "baseline-v1@4", "retrieval": "hybrid-v1"},
+  "objective": {"metric": "mrr@10", "rule": "evidence-coverage-v1"},
+  "factors": {
+    "chunk.params.max_tokens": [256, 384, 512, 800],
+    "chunk.params.overlap": [0, 32, 64],
+    "top_k": [5, 8]
+  },
+  "strategy": {"method": "random", "n": 8, "seed": 7},
+  "execution": {"max_parallel_runs": 1, "max_parallel_evals": 4},
+  "eval_options": {"shard_size": 25, "coverage_threshold": 0.7, "resamples": 2000, "seed": 0}
+}

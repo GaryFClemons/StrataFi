@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.retrieval.v1",
+  "title": "stratafi.retrieval.v1",
+  "description": "How a query searches an index",
+  "$defs": {
+    "ComponentRef": {
+      "additionalProperties": false,
+      "description": "A component and its parameters. In a document, a bare ID means \"with defaults\".",
+      "properties": {
+        "component": {
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "title": "Component",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "component"
+      ],
+      "title": "ComponentRef",
+      "type": "object"
+    },
+    "DenseRetrieverSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "top_n": {
+          "default": 50,
+          "description": "Results each retriever returns",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Top N",
+          "type": "integer"
+        },
+        "adapter": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A trained query adapter's model ID, applied to query vectors",
+          "title": "Adapter"
+        }
+      },
+      "title": "DenseRetrieverSettings",
+      "type": "object"
+    },
+    "Filters": {
+      "additionalProperties": false,
+      "properties": {
+        "collections": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 100,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collections"
+        },
+        "current_only": {
+          "default": true,
+          "description": "Only versions in effect on the as-of date",
+          "title": "Current Only",
+          "type": "boolean"
+        },
+        "statuses": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Statuses"
+        }
+      },
+      "title": "Filters",
+      "type": "object"
+    },
+    "Fusion": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "default": "rrf",
+          "enum": [
+            "rrf",
+            "weighted",
+            "none"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "k": {
+          "default": 60,
+          "description": "RRF's k",
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "alpha": {
+          "default": 0.5,
+          "description": "Weighted fusion: the dense weight",
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Alpha",
+          "type": "number"
+        }
+      },
+      "title": "Fusion",
+      "type": "object"
+    },
+    "RetrieverSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "top_n": {
+          "default": 50,
+          "description": "Results each retriever returns",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Top N",
+          "type": "integer"
+        }
+      },
+      "title": "RetrieverSettings",
+      "type": "object"
+    },
+    "Retrievers": {
+      "additionalProperties": false,
+      "properties": {
+        "dense": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DenseRetrieverSettings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RetrieverSettings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "title": "Retrievers",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.retrieval.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "retrievers": {
+      "$ref": "#/$defs/Retrievers"
+    },
+    "fusion": {
+      "$ref": "#/$defs/Fusion"
+    },
+    "candidates": {
+      "default": 50,
+      "description": "Fused results the reranker sees",
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Candidates",
+      "type": "integer"
+    },
+    "filters": {
+      "$ref": "#/$defs/Filters"
+    },
+    "rerank": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ComponentRef"
+        },
+        {
+          "pattern": "^[a-z][a-z0-9-]{0,31}/[a-z0-9][a-z0-9.-]{0,63}$",
+          "type": "string"
+        }
+      ],
+      "title": "Rerank"
+    },
+    "top_k": {
+      "default": 8,
+      "description": "Passages returned",
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Top K",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema",
+    "name"
+  ],
+  "type": "object"
+}

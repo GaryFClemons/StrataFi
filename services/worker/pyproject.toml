@@ -1,0 +1,23 @@
+[project]
+name = "stratafi-worker"
+version = "0.1.0"
+description = "Stratafi's worker: claims jobs by resource class and runs stage, eval, sweep and test tasks."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = ["stratafi-components", "stratafi-core", "stratafi-store"]
+
+[project.scripts]
+stratafi-worker = "stratafi_worker.main:main"
+
+[tool.uv.sources]
+stratafi-components = { workspace = true }
+stratafi-core = { workspace = true }
+stratafi-store = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_worker"]

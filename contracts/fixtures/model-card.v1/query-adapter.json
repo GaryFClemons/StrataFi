@@ -1,0 +1,42 @@
+{
+  "schema": "stratafi.model-card.v1",
+  "model": {
+    "id": "8e3b1c2d-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+    "name": "halcyon-query-adapter",
+    "version": 1,
+    "kind": "query-adapter",
+    "created_by": "dev-editor",
+    "created_at": "2026-11-05T10:00:09Z"
+  },
+  "base": {
+    "component": "embed/gateway",
+    "model": "embed-default",
+    "revision": "3a2b1c0d9e8f7a6b",
+    "dims": 384,
+    "metric": "cosine",
+    "license": "per embedder"
+  },
+  "trainer": {"component": "train/query-adapter", "version": "1.0.0", "params": {"epochs": 30, "seed": 0}},
+  "training_set": {
+    "id": "0b9d2a1e-6c43-4a8f-8d2e-7f6a5b4c3d2e",
+    "eval_set": {"name": "halcyon-retrieval", "version": 1, "split": "dev"},
+    "counts": {"records": 63, "pairs": 41, "abstentions": 11, "validation": 13},
+    "leak_guard": {"test_items": 27, "near_duplicates": 0, "test_items_overlapping": 20, "test_overlap": 0.909091}
+  },
+  "training": {
+    "run_id": "6f1d8a52-0b1c-4b0e-9a55-2f9a3c3f5e10",
+    "best_epoch": 2,
+    "baseline": {"recall@10": 0.6, "mrr@10": 0.41},
+    "best": {"recall@10": 0.7, "mrr@10": 0.47}
+  },
+  "use": {
+    "how": "retrieval config: retrievers.dense.adapter: 8e3b1c2d-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+    "lab_only": true,
+    "needs": ["models.in_process"]
+  },
+  "limits": [
+    "Trained on one eval set's dev split: confirm it once on the test split before relying on it.",
+    "Lab only: Stratafi's own retrieval applies query adapters; a search service elsewhere needs the adapter added before it can use one."
+  ],
+  "artifact": {"cache_key": "c4ca4238a0b923820dcc509a6f75849bc4ca4238a0b923820dcc509a6f75849b", "size_bytes": 590000, "files": 1}
+}

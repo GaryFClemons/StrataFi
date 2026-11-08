@@ -1,0 +1,85 @@
+{
+  "schema": "stratafi.training-run.v1",
+  "training_run": {
+    "id": "6f1d8a52-0b1c-4b0e-9a55-2f9a3c3f5e10",
+    "created_by": "dev-editor",
+    "created_at": "2026-11-05T10:00:00Z"
+  },
+  "configuration": {
+    "trainer": {
+      "component": "train/query-adapter",
+      "version": "1.0.0",
+      "params": {
+        "epochs": 30,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "temperature": 0.05,
+        "identity_weight": 0.01,
+        "hard_negatives": 8,
+        "in_batch": true,
+        "patience": 5,
+        "seed": 0
+      }
+    },
+    "params_hash": "5d41402abc4b2a76b9719d911017c5925d41402abc4b2a76b9719d911017c592",
+    "kind": "query-adapter"
+  },
+  "inputs": {
+    "training_set": {
+      "id": "0b9d2a1e-6c43-4a8f-8d2e-7f6a5b4c3d2e",
+      "cache_key": "1f0e3dad99908345f7439f8ffabdffc41f0e3dad99908345f7439f8ffabdffc4",
+      "eval_run_id": "2a7f9b31-5e0d-4c62-9b8a-1d2e3f4a5b6c",
+      "eval_set": {"name": "halcyon-retrieval", "version": 1, "split": "dev"},
+      "counts": {"records": 63, "pairs": 41, "abstentions": 11, "validation": 13}
+    },
+    "base": {
+      "component": "embed/gateway",
+      "model": "embed-default",
+      "revision": "3a2b1c0d9e8f7a6b",
+      "dims": 384,
+      "metric": "cosine"
+    }
+  },
+  "environment": {
+    "stratafi_version": "0.1.0",
+    "commit": "7c83326",
+    "python": "3.12.15",
+    "libraries": {"numpy": "2.3.4"},
+    "os": "Linux-6.18-x86_64",
+    "container_image": null
+  },
+  "hardware": {
+    "host": "lab-1",
+    "cpu_model": "AMD EPYC",
+    "cpu_cores": 4,
+    "ram_bytes": 16000000000,
+    "gpus": [],
+    "resource_classes": ["cpu"]
+  },
+  "execution": {
+    "status": "succeeded",
+    "started_at": "2026-11-05T10:00:01Z",
+    "finished_at": "2026-11-05T10:00:09Z",
+    "duration_ms": 8012.5,
+    "error_code": null,
+    "model_cached": false
+  },
+  "metrics": {
+    "baseline": {"epoch": 0, "train_loss": null, "validation_loss": 2.81, "recall@10": 0.6, "mrr@10": 0.41, "seconds": 0.02},
+    "epochs": [
+      {"epoch": 1, "train_loss": 2.4, "validation_loss": 2.7, "recall@10": 0.6, "mrr@10": 0.43, "seconds": 0.21},
+      {"epoch": 2, "train_loss": 2.1, "validation_loss": 2.6, "recall@10": 0.7, "mrr@10": 0.47, "seconds": 0.2}
+    ],
+    "best_epoch": 2,
+    "stopped_early": false,
+    "examples": {"train": 86, "validation": 21}
+  },
+  "outputs": [
+    {
+      "cache_key": "c4ca4238a0b923820dcc509a6f75849bc4ca4238a0b923820dcc509a6f75849b",
+      "kind": "model",
+      "size_bytes": 590000,
+      "files": 1
+    }
+  ]
+}

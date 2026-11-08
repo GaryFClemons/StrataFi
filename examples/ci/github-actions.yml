@@ -1,0 +1,69 @@
+# Gate a pull request on a StrataFi test suite.
+#
+# Copy this into .github/workflows/ of the repository that keeps the suite (here
+# stratafi/suites/policies-regression.yaml, from examples/suites) and the pipeline specs it
+# guards. The runner must reach your lab, so use a self-hosted runner on its network, or a lab
+# you've made reachable. Set two secrets (repository or organization):
+#
+#   STRATAFI_URL    the lab's address, such as http://127.0.0.1:8100
+#   STRATAFI_TOKEN  an API token with the read and tests:run scopes, made on the Tests screen
+#                   (Automation) or with POST /api-tokens; it expires, so rotate it
+#
+# The suite runs with `--trigger ci`. Its JUnit XML, its record (stratafi.test-run.v1) and its
+# Markdown summary are uploaded, the summary goes on the run's page, and the job fails when the
+# command exits non-zero: 1 a check failed or errored, 2 a suite or reference is wrong, 3 the
+# lab couldn't be reached or the run broke.
+name: stratafi-suite
+
+on:
+  pull_request:
+    paths:
+      - "stratafi/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stratafi-suite-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      STRATAFI_URL: ${{ secrets.STRATAFI_URL }}
+      STRATAFI_TOKEN: ${{ secrets.STRATAFI_TOKEN }}
+      SUITE: stratafi/suites/policies-regression.yaml
+      # Where the SDK comes from: the StrataFi repository's packages/sdk at a tag you trust.
+      # Replace OWNER and TAG.
+      STRATAFI_SDK: git+https://github.com/OWNER/StrataFi@TAG#subdirectory=packages/sdk
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install the Stratafi SDK
+        run: python -m pip install "stratafi @ $STRATAFI_SDK"
+      - name: Run the suite
+        id: suite
+        run: |
+          set +e
+          stratafi test run "$SUITE" --trigger ci \
+            --junit stratafi-junit.xml --json stratafi-run.json --markdown stratafi-summary.md \
+            --link-base "$STRATAFI_URL/stratafi"
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f stratafi-summary.md ]; then cat stratafi-summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stratafi-test-results
+          path: stratafi-*
+          if-no-files-found: ignore
+      - name: Fail on a failed suite
+        run: exit "${{ steps.suite.outputs.exit_code }}"

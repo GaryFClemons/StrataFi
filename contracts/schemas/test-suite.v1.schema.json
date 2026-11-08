@@ -1,0 +1,1247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.test-suite.v1",
+  "title": "stratafi.test-suite.v1",
+  "description": "Automated checks on a target: thresholds, baselines, golden queries and triggers",
+  "$defs": {
+    "AskerSpec": {
+      "additionalProperties": false,
+      "description": "Who asks a golden query: a user, roles and groups, or a name from the eval set's\n``askers`` table (a bare name, or a name without roles or groups).",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "user": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "User"
+        },
+        "roles": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Roles",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "type": "string"
+          },
+          "maxItems": 256,
+          "title": "Groups",
+          "type": "array"
+        }
+      },
+      "title": "AskerSpec",
+      "type": "object"
+    },
+    "BaselineRef": {
+      "additionalProperties": false,
+      "description": "What regressions, data changes and the revision guard compare with: a pinned eval run,\na profile version (``@previous`` resolves when the run starts), a pipeline spec with a\nretrieval config, or the last passing run of this suite.",
+      "properties": {
+        "eval_run": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A pinned, succeeded eval run",
+          "title": "Eval Run"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        },
+        "pipeline": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pipeline"
+        },
+        "retrieval": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retrieval"
+        },
+        "last_passing": {
+          "default": false,
+          "description": "The last passing run of this suite",
+          "title": "Last Passing",
+          "type": "boolean"
+        }
+      },
+      "title": "BaselineRef",
+      "type": "object"
+    },
+    "CustomCheck": {
+      "additionalProperties": false,
+      "description": "A Python function's verdict, run in the sandbox.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "custom",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "python": {
+          "description": "path.py:function; the file is in the suite's code",
+          "title": "Python",
+          "type": "string"
+        },
+        "timeout_s": {
+          "default": 60,
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Timeout S",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "python"
+      ],
+      "title": "CustomCheck",
+      "type": "object"
+    },
+    "DataChangeCheck": {
+      "additionalProperties": false,
+      "description": "What changed in the corpus since the baseline; always reported, held to ``max``.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "const": "data_change",
+          "title": "Type",
+          "type": "string"
+        },
+        "max": {
+          "$ref": "#/$defs/DataChangeMax"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "title": "DataChangeCheck",
+      "type": "object"
+    },
+    "DataChangeMax": {
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Added"
+        },
+        "removed": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Removed"
+        },
+        "changed": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed"
+        },
+        "unparseable": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Newly unparseable",
+          "title": "Unparseable"
+        },
+        "flagged": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Newly flagged by a scan",
+          "title": "Flagged"
+        }
+      },
+      "title": "DataChangeMax",
+      "type": "object"
+    },
+    "EvalSetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "const": "latest",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A frozen version; the latest frozen one if none",
+          "title": "Version"
+        },
+        "split": {
+          "const": "dev",
+          "default": "dev",
+          "description": "Suites run on dev: the locked test split only confirms a candidate",
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EvalSetRef",
+      "type": "object"
+    },
+    "Expect": {
+      "additionalProperties": false,
+      "properties": {
+        "in_top_k": {
+          "default": 10,
+          "description": "Within the first k passages",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "In Top K",
+          "type": "integer"
+        },
+        "doc_key": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+          "title": "Doc Key",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "contains": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A phrase the passage holds (case, accents and spacing ignored)",
+          "title": "Contains"
+        }
+      },
+      "required": [
+        "doc_key"
+      ],
+      "title": "Expect",
+      "type": "object"
+    },
+    "ExpectNot": {
+      "additionalProperties": false,
+      "properties": {
+        "in_top_k": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Every passage if none",
+          "title": "In Top K"
+        },
+        "doc_key": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+          "title": "Doc Key",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "doc_key"
+      ],
+      "title": "ExpectNot",
+      "type": "object"
+    },
+    "GoldenCheck": {
+      "additionalProperties": false,
+      "description": "One query's results: a passage it must find, or a document it must not return.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "golden",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "query": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "asker": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AskerSpec"
+            },
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            }
+          ],
+          "title": "Asker"
+        },
+        "as_of": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The day the query is asked",
+          "title": "As Of"
+        },
+        "expect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expect_not": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExpectNot"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "query"
+      ],
+      "title": "GoldenCheck",
+      "type": "object"
+    },
+    "MetricCheck": {
+      "additionalProperties": false,
+      "description": "A retrieval metric or a measure, held to ``min`` and/or ``max``.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "metric",
+                "budget",
+                "safety"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Follows from the metric when left out",
+          "title": "Type"
+        },
+        "metric": {
+          "description": "recall@5, mrr@10, latency_ms.p95, avoid_violations…",
+          "title": "Metric",
+          "type": "string"
+        },
+        "rule": {
+          "default": "knowledge-hit-v1",
+          "enum": [
+            "knowledge-hit-v1",
+            "evidence-coverage-v1",
+            "doc-v1"
+          ],
+          "title": "Rule",
+          "type": "string"
+        },
+        "checkpoint": {
+          "default": "final",
+          "enum": [
+            "dense",
+            "keyword",
+            "fused",
+            "candidates",
+            "reranked",
+            "final"
+          ],
+          "title": "Checkpoint",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Where"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "metric"
+      ],
+      "title": "MetricCheck",
+      "type": "object"
+    },
+    "NoOutcome": {
+      "additionalProperties": false,
+      "description": "``assert: {no_outcome: [infected, encrypted]}``: the scan outcomes not allowed.",
+      "properties": {
+        "no_outcome": {
+          "items": {
+            "enum": [
+              "infected",
+              "encrypted",
+              "malformed",
+              "limit_exceeded",
+              "pii",
+              "error"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "No Outcome",
+          "type": "array"
+        }
+      },
+      "required": [
+        "no_outcome"
+      ],
+      "title": "NoOutcome",
+      "type": "object"
+    },
+    "RegressionCheck": {
+      "additionalProperties": false,
+      "description": "A retrieval metric against the baseline, query by query (the paired test).",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "regression",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "rule": {
+          "default": "knowledge-hit-v1",
+          "enum": [
+            "knowledge-hit-v1",
+            "evidence-coverage-v1",
+            "doc-v1"
+          ],
+          "title": "Rule",
+          "type": "string"
+        },
+        "checkpoint": {
+          "default": "final",
+          "enum": [
+            "dense",
+            "keyword",
+            "fused",
+            "candidates",
+            "reranked",
+            "final"
+          ],
+          "title": "Checkpoint",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Where"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "vs_baseline": {
+          "$ref": "#/$defs/VsBaseline"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "vs_baseline"
+      ],
+      "title": "RegressionCheck",
+      "type": "object"
+    },
+    "RevisionGuardCheck": {
+      "additionalProperties": false,
+      "description": "The embedding model and revision are the baseline's, or a reindex is accepted.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "revision_guard",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "allow_change": {
+          "description": "false refuses a new embedding model or revision, which would need every document embedded again",
+          "title": "Allow Change",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "allow_change"
+      ],
+      "title": "RevisionGuardCheck",
+      "type": "object"
+    },
+    "StageCheck": {
+      "additionalProperties": false,
+      "description": "A pipeline stage's metric held to a threshold, or an assertion about the stage.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "enum": [
+                "stage",
+                "safety"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "stage": {
+          "enum": [
+            "extract",
+            "scan",
+            "parse",
+            "clean",
+            "chunk",
+            "enrich",
+            "embed",
+            "index"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Where"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metric"
+        },
+        "assert": {
+          "anyOf": [
+            {
+              "enum": [
+                "all_succeeded",
+                "no_findings",
+                "no_outcome"
+              ],
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/NoOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "all_succeeded, no_findings, or no_outcome (with outcomes, or as a mapping)",
+          "title": "Assert"
+        },
+        "outcomes": {
+          "description": "no_outcome: scan outcomes not allowed",
+          "items": {
+            "enum": [
+              "infected",
+              "encrypted",
+              "malformed",
+              "limit_exceeded",
+              "pii",
+              "error"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "detector": {
+          "anyOf": [
+            {
+              "const": "scan/pii",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "no_findings: what looks for sensitive data",
+          "title": "Detector"
+        },
+        "categories": {
+          "description": "no_findings: the PII categories that count; none means the detector's defaults (ssn, card_number, iban)",
+          "items": {
+            "enum": [
+              "ssn",
+              "card_number",
+              "iban",
+              "email",
+              "phone",
+              "ip_address"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Categories",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "stage"
+      ],
+      "title": "StageCheck",
+      "type": "object"
+    },
+    "TargetRef": {
+      "additionalProperties": false,
+      "description": "What a suite tests: a knowledge profile (its pipeline spec and retrieval config), or a\npipeline spec with an optional retrieval config. Checks that search need a retrieval\nconfig.",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "name@current (the latest approved), @previous, @latest or @N",
+          "title": "Profile"
+        },
+        "pipeline": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "name, name@N or name@latest",
+          "title": "Pipeline"
+        },
+        "retrieval": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "name, name@N or name@latest",
+          "title": "Retrieval"
+        }
+      },
+      "title": "TargetRef",
+      "type": "object"
+    },
+    "TriggerSpec": {
+      "additionalProperties": false,
+      "description": "When a suite runs on its own: an event, or a cron schedule in the suite's time zone.",
+      "properties": {
+        "on": {
+          "anyOf": [
+            {
+              "enum": [
+                "corpus_version_frozen",
+                "target_changed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "On"
+        },
+        "schedule": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schedule"
+        }
+      },
+      "title": "TriggerSpec",
+      "type": "object"
+    },
+    "VsBaseline": {
+      "additionalProperties": false,
+      "properties": {
+        "max_drop": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absolute drop allowed",
+          "title": "Max Drop"
+        },
+        "max_relative_drop": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Drop allowed as a share of the baseline",
+          "title": "Max Relative Drop"
+        },
+        "significance": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 1,
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Fail only when the paired test's p-value is at most this: noise alone doesn't fail a build",
+          "title": "Significance"
+        }
+      },
+      "title": "VsBaseline",
+      "type": "object"
+    },
+    "Where": {
+      "additionalProperties": false,
+      "description": "Which queries (metric checks) or documents (stage checks) a check covers.",
+      "properties": {
+        "tag": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Queries with this tag",
+          "title": "Tag"
+        },
+        "file_type": {
+          "anyOf": [
+            {
+              "maxLength": 127,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A media type: queries whose gold document has it, or documents of it",
+          "title": "File Type"
+        }
+      },
+      "title": "Where",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.test-suite.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "target": {
+      "$ref": "#/$defs/TargetRef"
+    },
+    "corpus": {
+      "description": "A corpus: name, name@version or name@latest",
+      "maxLength": 80,
+      "title": "Corpus",
+      "type": "string"
+    },
+    "eval_set": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvalSetRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Needed by checks that score queries"
+    },
+    "baseline": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BaselineRef"
+        },
+        {
+          "const": "last_passing",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline"
+    },
+    "time_zone": {
+      "default": "UTC",
+      "description": "Schedules' time zone",
+      "maxLength": 64,
+      "title": "Time Zone",
+      "type": "string"
+    },
+    "triggers": {
+      "items": {
+        "$ref": "#/$defs/TriggerSpec"
+      },
+      "maxItems": 20,
+      "title": "Triggers",
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/MetricCheck"
+          },
+          {
+            "$ref": "#/$defs/RegressionCheck"
+          },
+          {
+            "$ref": "#/$defs/StageCheck"
+          },
+          {
+            "$ref": "#/$defs/GoldenCheck"
+          },
+          {
+            "$ref": "#/$defs/DataChangeCheck"
+          },
+          {
+            "$ref": "#/$defs/RevisionGuardCheck"
+          },
+          {
+            "$ref": "#/$defs/CustomCheck"
+          }
+        ]
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "enum": [
+          "json",
+          "junit",
+          "markdown"
+        ],
+        "type": "string"
+      },
+      "maxItems": 3,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "code": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Custom checks' Python files by relative path: kept and hashed with the suite's version. stratafi test run attaches the files the checks name.",
+      "title": "Code",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "target",
+    "corpus",
+    "checks"
+  ],
+  "type": "object"
+}

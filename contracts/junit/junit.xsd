@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The JUnit XML that `GET /test-runs/{id}/report?format=junit` and the junit option of `stratafi test run`
+  write: the Ant format that CI systems read (GitHub Actions' test reporters,
+  GitLab, Jenkins). Written for Stratafi from that format's structure: a `testsuites` root with
+  one `testsuite`, its `properties`, and a `testcase` per check that holds at most one of
+  `failure`, `error` or `skipped`. The unit tier validates every report against it.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:simpleType name="count">
+    <xs:restriction base="xs:nonNegativeInteger"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="seconds">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- A local time without a zone, as Ant writes it: 2026-10-31T14:02:12 -->
+  <xs:simpleType name="timestamp">
+    <xs:restriction base="xs:dateTime">
+      <xs:pattern value="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="nonEmpty">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="problem">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="message" type="xs:string"/>
+        <xs:attribute name="type" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="skip">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="message" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:element name="testsuites">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="testsuite" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="properties" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="nonEmpty" use="required"/>
+                        <xs:attribute name="value" type="xs:string" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="testcase" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:choice minOccurs="0" maxOccurs="1">
+                      <xs:element name="failure" type="problem"/>
+                      <xs:element name="error" type="problem"/>
+                      <xs:element name="skipped" type="skip"/>
+                    </xs:choice>
+                    <xs:element name="system-out" type="xs:string" minOccurs="0"/>
+                    <xs:element name="system-err" type="xs:string" minOccurs="0"/>
+                  </xs:sequence>
+                  <xs:attribute name="name" type="nonEmpty" use="required"/>
+                  <xs:attribute name="classname" type="nonEmpty" use="required"/>
+                  <xs:attribute name="time" type="seconds" use="required"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="system-out" type="xs:string" minOccurs="0"/>
+              <xs:element name="system-err" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="nonEmpty" use="required"/>
+            <xs:attribute name="tests" type="count" use="required"/>
+            <xs:attribute name="failures" type="count" use="required"/>
+            <xs:attribute name="errors" type="count" use="required"/>
+            <xs:attribute name="skipped" type="count" use="required"/>
+            <xs:attribute name="time" type="seconds" use="required"/>
+            <xs:attribute name="timestamp" type="timestamp" use="required"/>
+            <xs:attribute name="hostname" type="nonEmpty" use="required"/>
+            <xs:attribute name="id" type="count"/>
+            <xs:attribute name="package" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string"/>
+      <xs:attribute name="tests" type="count"/>
+      <xs:attribute name="failures" type="count"/>
+      <xs:attribute name="errors" type="count"/>
+      <xs:attribute name="skipped" type="count"/>
+      <xs:attribute name="time" type="seconds"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

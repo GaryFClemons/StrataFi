@@ -1,0 +1,24 @@
+[project]
+name = "stratafi-core"
+version = "0.1.0"
+description = "Stratafi's domain: models, specs, hashing, the component registry, stage interfaces, metrics and statistics, plus shared config, logging and identity."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "cryptography>=44",
+    "numpy>=2.1",
+    # The API's and the worker's Prometheus metrics.
+    "prometheus-client>=0.21",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "pyjwt[crypto]>=2.10",
+    "pyyaml>=6.0.2",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stratafi_core"]

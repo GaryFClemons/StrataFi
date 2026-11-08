@@ -1,0 +1,46 @@
+# Halcyon Coffee Co.'s internal knowledge base, as a StrataFi corpus manifest: an
+# invented specialty roaster with 40 cafés, the Fenwick Street roastery and a wholesale business.
+# Each entry gives a document's path (relative to this folder), collection, key, version,
+# effective dates, title, ACL, source URI and status. Import it with that metadata
+# (extract/manifest), e.g. POST /api/v1/documents/import-manifest with root `fixtures` and path
+# `demo-corpus/corpus`, or upload this file with the SDK (`client.corpora.upload(..., manifest=)`).
+#
+# Everything is invented and released under CC0-1.0. The eval set's "today" (as_of) is
+# 2026-11-01, and some documents are traps on purpose:
+#
+# - Superseded: Paid Time Off and Leave v2 (replaced by v3 on 2026-01-01) and Halcyon Rewards v2
+#   (replaced by v3 on 2025-09-01) are still in the corpus, with older numbers for the same rules.
+# - Future-dated: Halcyon Rewards v4 is approved but takes effect only on 2027-01-01, so v3 is
+#   current until then. v4 changes the free-drink threshold, point expiry, the birthday reward,
+#   Gold status and the adjustment limit, and adds a reusable-cup bonus that v3 doesn't have.
+# - ACL: management/ is readable only by the `managers` group and executive/ (a confidential
+#   2027 expansion memo) only by `executives`. The eval set asks the same questions as `staff`,
+#   who must get nothing back from those documents.
+# - Tables: some answers sit only in a table row (holding times, recipes, the cleaning schedule,
+#   wholesale tiers, pay bands, attendance points and policy owners).
+tenant: halcyon
+documents:
+  - {path: handbook/pto-leave-v2.md, collection: handbook, doc_key: pto-leave, version: "2", effective_from: 2024-01-01, effective_to: 2026-01-01, title: Paid Time Off and Leave Policy, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/pto-leave-v2.md, status: published, expect: indexed}
+  - {path: handbook/pto-leave-v3.md, collection: handbook, doc_key: pto-leave, version: "3", effective_from: 2026-01-01, title: Paid Time Off and Leave Policy, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/pto-leave-v3.md, status: published, expect: indexed}
+  - {path: handbook/scheduling-v4.md, collection: handbook, doc_key: scheduling, version: "4", effective_from: 2026-03-01, title: Scheduling and Shift Swap Policy, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/scheduling-v4.md, status: published, expect: indexed}
+  - {path: handbook/tips-v3.md, collection: handbook, doc_key: tips, version: "3", effective_from: 2025-07-01, title: Tip Policy, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/tips-v3.md, status: published, expect: indexed}
+  - {path: handbook/dress-code-v2.md, collection: handbook, doc_key: dress-code, version: "2", effective_from: 2025-03-01, title: Dress Code and Appearance Standard, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/dress-code-v2.md, status: published, expect: indexed}
+  - {path: handbook/workplace-safety-v3.md, collection: handbook, doc_key: workplace-safety, version: "3", effective_from: 2026-02-01, title: Workplace Safety and Injury Reporting, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/workplace-safety-v3.md, status: published, expect: indexed}
+  - {path: handbook/code-of-conduct-v2.md, collection: handbook, doc_key: code-of-conduct, version: "2", effective_from: 2025-01-15, title: Code of Conduct, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/code-of-conduct-v2.md, status: published, expect: indexed}
+  - {path: handbook/barista-training-v5.md, collection: handbook, doc_key: barista-training, version: "5", effective_from: 2026-05-01, title: Barista Training and Certification Program, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/barista-training-v5.md, status: published, expect: indexed}
+  - {path: handbook/hq-remote-work-v2.md, collection: handbook, doc_key: hq-remote-work, version: "2", effective_from: 2026-04-01, title: HQ Remote Work and Expense Policy, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/hq-remote-work-v2.md, status: published, expect: indexed}
+  - {path: handbook/policy-index-v9.md, collection: handbook, doc_key: policy-index, version: "9", effective_from: 2026-09-15, title: Policy Index and Owners, acl: {groups: [all-staff], users: []}, source_uri: corpus/handbook/policy-index-v9.md, status: published, expect: indexed}
+  - {path: operations/food-safety-v4.md, collection: operations, doc_key: food-safety, version: "4", effective_from: 2026-06-01, title: Food Safety and Allergen Standard, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/food-safety-v4.md, status: published, expect: indexed}
+  - {path: operations/brew-standards-v6.md, collection: operations, doc_key: brew-standards, version: "6", effective_from: 2026-08-01, title: Espresso and Brew Standards, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/brew-standards-v6.md, status: published, expect: indexed}
+  - {path: operations/equipment-cleaning-v3.md, collection: operations, doc_key: equipment-cleaning, version: "3", effective_from: 2026-02-15, title: Equipment Cleaning Schedule, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/equipment-cleaning-v3.md, status: published, expect: indexed}
+  - {path: operations/opening-closing-v5.md, collection: operations, doc_key: opening-closing, version: "5", effective_from: 2026-04-01, title: Opening and Closing Procedures, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/opening-closing-v5.md, status: published, expect: indexed}
+  - {path: operations/refunds-remakes-v3.md, collection: operations, doc_key: refunds-remakes, version: "3", effective_from: 2025-11-01, title: "Refunds, Remakes and Guest Recovery", acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/refunds-remakes-v3.md, status: published, expect: indexed}
+  - {path: operations/loyalty-v2.md, collection: operations, doc_key: loyalty, version: "2", effective_from: 2024-06-01, effective_to: 2025-09-01, title: Halcyon Rewards Program, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/loyalty-v2.md, status: published, expect: indexed}
+  - {path: operations/loyalty-v3.md, collection: operations, doc_key: loyalty, version: "3", effective_from: 2025-09-01, effective_to: 2027-01-01, title: Halcyon Rewards Program, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/loyalty-v3.md, status: published, expect: indexed}
+  - {path: operations/loyalty-v4.md, collection: operations, doc_key: loyalty, version: "4", effective_from: 2027-01-01, title: Halcyon Rewards Program, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/loyalty-v4.md, status: published, expect: indexed}
+  - {path: operations/mobile-orders-v2.md, collection: operations, doc_key: mobile-orders, version: "2", effective_from: 2026-01-15, title: Mobile Order and Pay Procedures, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/mobile-orders-v2.md, status: published, expect: indexed}
+  - {path: operations/wholesale-v4.md, collection: operations, doc_key: wholesale, version: "4", effective_from: 2026-07-01, title: Wholesale Pricing and Ordering Guide, acl: {groups: [all-staff], users: []}, source_uri: corpus/operations/wholesale-v4.md, status: published, expect: indexed}
+  - {path: management/cash-handling-v4.md, collection: management, doc_key: cash-handling, version: "4", effective_from: 2026-03-15, title: Cash Handling and Safe Procedures, acl: {groups: [managers], users: []}, source_uri: corpus/management/cash-handling-v4.md, status: published, expect: indexed}
+  - {path: management/hiring-pay-v3.md, collection: management, doc_key: hiring-pay, version: "3", effective_from: 2026-01-01, title: Hiring and Pay Bands, acl: {groups: [managers], users: []}, source_uri: corpus/management/hiring-pay-v3.md, status: published, expect: indexed}
+  - {path: management/performance-discipline-v2.md, collection: management, doc_key: performance-discipline, version: "2", effective_from: 2025-10-01, title: Performance and Discipline Guide, acl: {groups: [managers], users: []}, source_uri: corpus/management/performance-discipline-v2.md, status: published, expect: indexed}
+  - {path: executive/expansion-2027-v1.md, collection: executive, doc_key: expansion-2027, version: "1", effective_from: 2026-10-20, title: 2027 Expansion Plan, acl: {groups: [executives], users: []}, source_uri: corpus/executive/expansion-2027-v1.md, status: published, expect: indexed}

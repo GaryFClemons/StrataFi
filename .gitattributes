@@ -1,0 +1,27 @@
+# Linux is the target, so every text file is stored and checked out with LF, whatever
+# core.autocrlf says on the machine that edits it.
+* text=auto eol=lf
+
+# Binary fixtures and artifacts: never convert line endings or diff as text.
+*.pdf   binary
+*.docx  binary
+*.xlsx  binary
+*.pptx  binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.zip   binary
+*.7z    binary
+*.gz    binary
+*.tgz   binary
+*.npy   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+
+# Format fixtures are checked byte for byte (scripts/format_fixtures.py --check); the plain-text
+# ones use CRLF and a byte-order mark on purpose.
+fixtures/formats/* -text

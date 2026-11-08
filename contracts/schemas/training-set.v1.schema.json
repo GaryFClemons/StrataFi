@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.training-set.v1",
+  "title": "stratafi.training-set.v1",
+  "description": "One eval item as training data: a line of a training set (JSONL)",
+  "$defs": {
+    "TrainingPassage": {
+      "additionalProperties": false,
+      "description": "One passage of a training record: a chunk with where it came from.",
+      "properties": {
+        "chunk_id": {
+          "title": "Chunk Id",
+          "type": "string"
+        },
+        "doc_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doc Key"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "evidence",
+            "retrieved",
+            "avoid",
+            "must_not_return",
+            "abstention"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Positives: the evidence it covers; negatives: the most it covers",
+          "title": "Grade"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Its best rank in the lists mined",
+          "title": "Rank"
+        },
+        "checkpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The list that ranked it best",
+          "title": "Checkpoint"
+        }
+      },
+      "required": [
+        "chunk_id",
+        "text",
+        "reason"
+      ],
+      "title": "TrainingPassage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "item_id": {
+      "title": "Item Id",
+      "type": "string"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "validation"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "query": {
+      "title": "Query",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "abstention": {
+      "default": false,
+      "description": "The item has no evidence: negatives only",
+      "title": "Abstention",
+      "type": "boolean"
+    },
+    "reference_answer": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference Answer"
+    },
+    "positives": {
+      "items": {
+        "$ref": "#/$defs/TrainingPassage"
+      },
+      "title": "Positives",
+      "type": "array"
+    },
+    "negatives": {
+      "items": {
+        "$ref": "#/$defs/TrainingPassage"
+      },
+      "title": "Negatives",
+      "type": "array"
+    }
+  },
+  "required": [
+    "item_id",
+    "split",
+    "query"
+  ],
+  "type": "object"
+}

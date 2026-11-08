@@ -1,0 +1,118 @@
+# StrataFi's checks: Python (lint, the unit tier and the generated contracts), the web app, and
+# the integration tier against Postgres 16 with pgvector.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      # setup-uv publishes no major-version tags, so this pins a release's commit. uv 0.13.5
+      # writes uv.lock's format.
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.13.5"
+      - name: Sync the locked workspace
+        run: uv sync --all-packages --locked
+      # parse/ocr's default engine is the tesseract binary; its threshold test runs on it.
+      - name: Tesseract
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+      - name: Ruff
+        run: |
+          uv run ruff check
+          uv run ruff format --check
+      - name: Unit tier
+        run: uv run pytest -p no:cacheprovider -m "not integration and not model and not system"
+      - name: The OpenAPI contract is current
+        run: uv run python scripts/export_openapi.py --check
+      - name: The contracts' JSON Schemas are current
+        run: uv run python scripts/export_contracts.py --check
+      - name: The SDK's models are current
+        run: uv run python scripts/export_sdk_models.py --check
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: The generated API client is current
+        run: npm run api:check
+      - name: The UI's performance budgets hold
+        run: npm run budgets
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      # The image compose.yaml pins. The tier makes its own databases through this superuser,
+      # each owned by a role of its own that isn't one.
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+        env:
+          POSTGRES_USER: stratafi_admin
+          POSTGRES_PASSWORD: stratafi-ci-admin-password
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U stratafi_admin -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      STRATAFI_TEST_PG_ADMIN_DSN: postgresql://stratafi_admin:stratafi-ci-admin-password@127.0.0.1:5432/postgres
+      # The in-process clamd fake, which flags only the EICAR test file.
+      STRATAFI_TEST_CLAMD: fake
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.13.5"
+      - name: Sync the locked workspace
+        run: uv sync --all-packages --locked
+      # Tesseract for OCR, and Postgres 16's pg_dump and pg_restore for the restore drill, ahead
+      # of any newer client the runner has.
+      - name: Tesseract and the Postgres 16 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng postgresql-client-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      # SeaweedFS and Tika run in the tier's own compose project (stratafi-test), which never
+      # pulls; compose checks the file's required variables even for a pull.
+      - name: Pull the SeaweedFS and Tika images
+        env:
+          STRATAFI_PG_ADMIN_PASSWORD: unused
+          STRATAFI_PG_PASSWORD: unused
+          STRATAFI_S3_SECRET_KEY: unused
+          STRATAFI_S3_ADMIN_SECRET_KEY: unused
+        run: docker compose --profile seaweedfs --profile tika pull seaweedfs seaweedfs-init tika
+      - name: Integration tier
+        run: uv run pytest -p no:cacheprovider -m integration

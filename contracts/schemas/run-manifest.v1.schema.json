@@ -1,0 +1,1085 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:stratafi:schema:stratafi.run-manifest.v1",
+  "title": "stratafi.run-manifest.v1",
+  "description": "Everything a run recorded",
+  "$defs": {
+    "ManifestComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Where the spec names it, e.g. stages.chunk",
+          "title": "Path",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "params_hash": {
+          "title": "Params Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "id",
+        "version",
+        "params",
+        "params_hash"
+      ],
+      "title": "ManifestComponent",
+      "type": "object"
+    },
+    "ManifestConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "pipeline": {
+          "additionalProperties": true,
+          "description": "The resolved pipeline spec",
+          "title": "Pipeline",
+          "type": "object"
+        },
+        "pipeline_hash": {
+          "title": "Pipeline Hash",
+          "type": "string"
+        },
+        "pipeline_ref": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The saved spec it came from: name and version",
+          "title": "Pipeline Ref"
+        },
+        "retrieval": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retrieval"
+        },
+        "retrieval_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retrieval Hash"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/$defs/ManifestComponent"
+          },
+          "title": "Components",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pipeline",
+        "pipeline_hash"
+      ],
+      "title": "ManifestConfiguration",
+      "type": "object"
+    },
+    "ManifestCorpus": {
+      "additionalProperties": false,
+      "properties": {
+        "corpus_id": {
+          "title": "Corpus Id",
+          "type": "string"
+        },
+        "corpus_version_id": {
+          "title": "Corpus Version Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "manifest_hash": {
+          "title": "Manifest Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "corpus_id",
+        "corpus_version_id",
+        "version",
+        "manifest_hash"
+      ],
+      "title": "ManifestCorpus",
+      "type": "object"
+    },
+    "ManifestCost": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ProviderUsage"
+          },
+          "title": "Providers",
+          "type": "object"
+        },
+        "currency": {
+          "default": "USD",
+          "title": "Currency",
+          "type": "string"
+        },
+        "estimated": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated"
+        },
+        "price_table": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Price per 1,000 tokens by provider, at run time",
+          "title": "Price Table",
+          "type": "object"
+        }
+      },
+      "title": "ManifestCost",
+      "type": "object"
+    },
+    "ManifestDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "entry": {
+          "description": "The document's name in the corpus version",
+          "title": "Entry",
+          "type": "string"
+        },
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "traits": {
+          "additionalProperties": true,
+          "title": "Traits",
+          "type": "object"
+        }
+      },
+      "required": [
+        "entry",
+        "document_id",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "title": "ManifestDocument",
+      "type": "object"
+    },
+    "ManifestEgress": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "documents": {
+          "description": "Document IDs",
+          "items": {
+            "type": "string"
+          },
+          "title": "Documents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "ManifestEgress",
+      "type": "object"
+    },
+    "ManifestEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "stratafi_version": {
+          "title": "Stratafi Version",
+          "type": "string"
+        },
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "python": {
+          "title": "Python",
+          "type": "string"
+        },
+        "libraries": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Libraries",
+          "type": "object"
+        },
+        "os": {
+          "title": "Os",
+          "type": "string"
+        },
+        "container_image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Image"
+        }
+      },
+      "required": [
+        "stratafi_version",
+        "python",
+        "os"
+      ],
+      "title": "ManifestEnvironment",
+      "type": "object"
+    },
+    "ManifestExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelling",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/$defs/StageExecution"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/$defs/TaskExecution"
+          },
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "ManifestExecution",
+      "type": "object"
+    },
+    "ManifestGpu": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "memory_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Bytes"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Driver"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ManifestGpu",
+      "type": "object"
+    },
+    "ManifestHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The worker host's name, if recorded",
+          "title": "Host"
+        },
+        "cpu_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Model"
+        },
+        "cpu_cores": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cpu Cores"
+        },
+        "ram_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ram Bytes"
+        },
+        "gpus": {
+          "items": {
+            "$ref": "#/$defs/ManifestGpu"
+          },
+          "title": "Gpus",
+          "type": "array"
+        },
+        "resource_classes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resource Classes",
+          "type": "array"
+        }
+      },
+      "title": "ManifestHardware",
+      "type": "object"
+    },
+    "ManifestInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "corpus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ManifestCorpus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "documents": {
+          "items": {
+            "$ref": "#/$defs/ManifestDocument"
+          },
+          "title": "Documents",
+          "type": "array"
+        },
+        "sample": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ManifestSample"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "eval_set": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Null for a pipeline run",
+          "title": "Eval Set"
+        }
+      },
+      "title": "ManifestInputs",
+      "type": "object"
+    },
+    "ManifestModel": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "description": "embed, rerank, ...",
+          "title": "Role",
+          "type": "string"
+        },
+        "component": {
+          "title": "Component",
+          "type": "string"
+        },
+        "alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias"
+        },
+        "served_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Served Model"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "dimensions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dimensions"
+        },
+        "dtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dtype"
+        },
+        "prefixes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Prefixes",
+          "type": "object"
+        },
+        "tokenizer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tokenizer"
+        }
+      },
+      "required": [
+        "role",
+        "component"
+      ],
+      "title": "ManifestModel",
+      "type": "object"
+    },
+    "ManifestOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key": {
+          "title": "Cache Key",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "size_bytes": {
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "summary": {
+          "additionalProperties": true,
+          "title": "Summary",
+          "type": "object"
+        }
+      },
+      "required": [
+        "cache_key",
+        "kind",
+        "stage",
+        "size_bytes"
+      ],
+      "title": "ManifestOutput",
+      "type": "object"
+    },
+    "ManifestRun": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "pipeline",
+          "default": "pipeline",
+          "title": "Kind",
+          "type": "string"
+        },
+        "mode": {
+          "default": "batch",
+          "enum": [
+            "interactive",
+            "batch"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "until": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The last stage the run goes to",
+          "title": "Until"
+        },
+        "rerun_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rerun Of"
+        },
+        "rerun_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The stage a re-run started from",
+          "title": "Rerun From"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_by",
+        "created_at"
+      ],
+      "title": "ManifestRun",
+      "type": "object"
+    },
+    "ManifestSample": {
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "entries": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entries"
+        }
+      },
+      "title": "ManifestSample",
+      "type": "object"
+    },
+    "ProviderUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "default": 0,
+          "title": "Calls",
+          "type": "integer"
+        },
+        "tokens": {
+          "default": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "ProviderUsage",
+      "type": "object"
+    },
+    "StageExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "tasks": {
+          "default": 0,
+          "title": "Tasks",
+          "type": "integer"
+        },
+        "succeeded": {
+          "default": 0,
+          "title": "Succeeded",
+          "type": "integer"
+        },
+        "cached": {
+          "default": 0,
+          "title": "Cached",
+          "type": "integer"
+        },
+        "skipped": {
+          "default": 0,
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "failed": {
+          "default": 0,
+          "title": "Failed",
+          "type": "integer"
+        },
+        "cancelled": {
+          "default": 0,
+          "title": "Cancelled",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "default": 0.0,
+          "title": "Duration Ms",
+          "type": "number"
+        },
+        "throughput_per_second": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Throughput Per Second"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "stage"
+      ],
+      "title": "StageExecution",
+      "type": "object"
+    },
+    "TaskExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "entry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None for corpus-level tasks",
+          "title": "Entry"
+        },
+        "component": {
+          "title": "Component",
+          "type": "string"
+        },
+        "component_version": {
+          "title": "Component Version",
+          "type": "string"
+        },
+        "cache_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Key"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "queued",
+            "running",
+            "succeeded",
+            "cached",
+            "skipped",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "cache_hit": {
+          "default": false,
+          "title": "Cache Hit",
+          "type": "boolean"
+        },
+        "attempts": {
+          "default": 0,
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "duration_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Ms"
+        },
+        "peak_memory_bytes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Peak Memory Bytes"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "stage",
+        "component",
+        "component_version",
+        "status"
+      ],
+      "title": "TaskExecution",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "stratafi.run-manifest.v1",
+      "default": "stratafi.run-manifest.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "run": {
+      "$ref": "#/$defs/ManifestRun"
+    },
+    "configuration": {
+      "$ref": "#/$defs/ManifestConfiguration"
+    },
+    "inputs": {
+      "$ref": "#/$defs/ManifestInputs"
+    },
+    "models": {
+      "items": {
+        "$ref": "#/$defs/ManifestModel"
+      },
+      "title": "Models",
+      "type": "array"
+    },
+    "environment": {
+      "$ref": "#/$defs/ManifestEnvironment"
+    },
+    "hardware": {
+      "$ref": "#/$defs/ManifestHardware"
+    },
+    "execution": {
+      "$ref": "#/$defs/ManifestExecution"
+    },
+    "cost": {
+      "$ref": "#/$defs/ManifestCost"
+    },
+    "egress": {
+      "items": {
+        "$ref": "#/$defs/ManifestEgress"
+      },
+      "title": "Egress",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/ManifestOutput"
+      },
+      "title": "Outputs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run",
+    "configuration",
+    "inputs",
+    "environment",
+    "hardware",
+    "execution"
+  ],
+  "type": "object"
+}

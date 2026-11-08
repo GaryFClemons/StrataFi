@@ -1,0 +1,35 @@
+# The default components: every stage as a new spec has it,
+# with ClamAV and the PII scan in the scan.
+schema: stratafi.pipeline.v1
+name: baseline-v1
+description: The default components, with ClamAV and the PII scan
+stages:
+  extract: {unpack: [unpack/zip]}
+  scan:
+    checks:
+      - {component: scan/content-safety}
+      - {component: scan/clamav, params: {max_signature_age_hours: 72}}
+      - {component: scan/pii, params: {categories: [ssn, card_number, iban]}}
+      - {component: scan/dedupe}
+    on_outcome: {infected: exclude, encrypted: exclude, malformed: exclude,
+                 limit_exceeded: exclude, pii: exclude, duplicate: exclude, error: exclude}
+  parse:
+    route:
+      default: {component: parse/markitdown}
+      md: {component: parse/markdown}
+      txt: {component: parse/markdown}
+      pdf: {component: parse/pypdf}
+      docx: {component: parse/markitdown}
+      pptx: {component: parse/markitdown}
+      xlsx: {component: parse/markitdown}
+      html: {component: parse/markitdown}
+  clean: [{component: clean/whitespace}]
+  chunk:
+    component: chunk/sections
+    params: {max_tokens: 400, min_tokens: 200, overlap: 0, token_estimator: "chars/4"}
+    index_text: "{title}\n{heading_path}\n{text}"
+  enrich: {component: enrich/none}
+  embed: {component: embed/gateway, params: {alias: embed-local, batch_size: 32}}
+  index:
+    dense: {component: index/exact}
+    keyword: {component: index/bm25}
