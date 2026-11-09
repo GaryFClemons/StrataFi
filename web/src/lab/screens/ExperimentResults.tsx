@@ -621,7 +621,7 @@ function Confirmations({
               className={inputClass}
               value={name}
               onChange={(event) => setName(event.target.value)}
-              pattern="[a-z0-9][a-z0-9._-]{0,63}"
+              pattern="[a-z0-9][a-z0-9._\-]{0,63}"
               required
             />
           </label>

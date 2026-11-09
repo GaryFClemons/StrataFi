@@ -306,7 +306,7 @@ export function Pipelines({ step }: { step: StepId }) {
                 className={inputClass}
                 value={nameDraft}
                 onChange={(event) => setNameDraft(event.target.value)}
-                pattern="[a-z0-9][a-z0-9._-]{0,63}"
+                pattern="[a-z0-9][a-z0-9._\-]{0,63}"
               />
             </label>
             <Button type="submit" size="sm" variant="secondary">

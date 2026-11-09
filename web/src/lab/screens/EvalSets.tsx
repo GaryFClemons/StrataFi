@@ -112,7 +112,7 @@ export function EvalSets() {
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="halcyon-retrieval"
-              pattern="[a-z0-9][a-z0-9._-]{0,63}"
+              pattern="[a-z0-9][a-z0-9._\-]{0,63}"
               required
             />
           </label>

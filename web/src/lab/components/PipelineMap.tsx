@@ -159,6 +159,11 @@ function NodeView({
   );
 }
 
+/** Parse routes that share a parser make identical rows: each shows once. */
+function uniqueRows(rows: string[][]): string[][] {
+  return [...new Map(rows.map((row) => [row.join("|"), row])).values()];
+}
+
 /** The table view: every node and edge as text. */
 export function MapTable({ map }: { map: MapLike }) {
   const rows = mapRows(map);
@@ -170,7 +175,7 @@ export function MapTable({ map }: { map: MapLike }) {
       <div className="mt-2 grid gap-3">
         <DataTable<string[]>
           label="Map nodes"
-          rows={rows.nodes}
+          rows={uniqueRows(rows.nodes)}
           rowKey={(row) => row.join("|")}
           columns={[
             "Node",
@@ -185,7 +190,7 @@ export function MapTable({ map }: { map: MapLike }) {
         />
         <DataTable<string[]>
           label="Map edges"
-          rows={rows.edges}
+          rows={uniqueRows(rows.edges)}
           rowKey={(row) => row.join("|")}
           columns={["From", "Kind", "To", "What"].map((header, index) => ({
             header,

@@ -154,7 +154,7 @@ export function ParseRoutes({
             value={key}
             onChange={(event) => setKey(event.target.value)}
             placeholder="pdf[scanned]"
-            pattern="[a-z0-9][a-z0-9.+/-]*(\[[a-z_,]+\])?"
+            pattern="[a-z0-9][a-z0-9.+\/\-]*(\[[a-z_,]+\])?"
           />
         </label>
         <datalist id="route-keys">
@@ -402,7 +402,7 @@ function AuthorForm({
           className={inputClass}
           value={evalSet}
           onChange={(event) => setEvalSet(event.target.value)}
-          pattern="[a-z0-9][a-z0-9._-]{0,63}"
+          pattern="[a-z0-9][a-z0-9._\-]{0,63}"
         />
       </label>
       <div className="flex gap-2">
