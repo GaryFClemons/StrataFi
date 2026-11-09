@@ -11,9 +11,10 @@ permissions:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+# Ubuntu 24.04, not ubuntu-latest: its apt has postgresql-client-16, which the restore drill needs.
 jobs:
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -44,7 +45,7 @@ jobs:
         run: uv run python scripts/export_sdk_models.py --check
 
   web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -67,7 +68,7 @@ jobs:
         run: npm run budgets
 
   integration:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     services:
       # The image compose.yaml pins. The tier makes its own databases through this superuser,

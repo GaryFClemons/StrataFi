@@ -461,6 +461,7 @@ def render_docx(document: Document, *, compression: int = zipfile.ZIP_DEFLATED) 
             info = zipfile.ZipInfo(name, date_time=ZIP_TIME)
             info.compress_type = compression
             info.external_attr = 0o644 << 16
+            info.create_system = 0  # its default is the OS's, and it's part of the bytes
             archive.writestr(info, content.encode("utf-8"))
     return buffer.getvalue()
 

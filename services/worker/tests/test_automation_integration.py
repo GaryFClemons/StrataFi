@@ -123,7 +123,9 @@ def test_a_due_schedule_fires_in_the_worker(
         lab.post("/test-suites", {"document": suite(triggers=[{"schedule": "17 6 * * 1-5"}])})
         automation = lab.get("/test-suites/halcyon-auto/automation")
         assert [item["cron"] for item in automation["schedules"]] == ["17 6 * * 1-5"]
-        upcoming = datetime.fromisoformat(automation["schedules"][0]["next_fire_at"])
+        # In UTC, the suite's default, whatever time zone the database answers in.
+        schedule = automation["schedules"][0]
+        upcoming = datetime.fromisoformat(schedule["next_fire_at"]).astimezone(UTC)
         assert upcoming > datetime.now(UTC)
         assert (upcoming.hour, upcoming.minute) == (6, 17)
         with migrated_engine.begin() as conn:
