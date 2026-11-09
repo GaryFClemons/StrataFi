@@ -57,7 +57,8 @@ def test_each_format_arrives_with_its_text_and_structure(
     raw, document = parse(tika, path)
     assert raw.media_type in TikaXhtml.info.accepts
     assert PHRASES[name].lower() in " ".join(document.text.split()).lower()
-    assert len(document.elements) > 1
+    # Tika's text parser answers with one paragraph; the other formats have structure.
+    assert len(document.elements) >= (1 if name.endswith((".txt", ".md")) else 2)
     for element in document.elements:
         assert document.text[element.char_start : element.char_end] == element.text
     if name.endswith(".pdf"):
