@@ -75,29 +75,38 @@ in the screenshot above.
 
 ## Quick start
 
-You need Python 3.12 with [uv](https://docs.astral.sh/uv/) 0.13.5, Node 24,
-[Ollama](https://ollama.com), and Postgres 16 with pgvector (Docker Compose starts it; on
-Windows without Docker, WSL can run it).
+You need [uv](https://docs.astral.sh/uv/) 0.13.5 (it fetches Python 3.12 if you don't have it),
+Node 24, [Ollama](https://ollama.com), and Docker for Postgres 16 with pgvector. The models take
+about 2.2 GB. These commands work in any shell:
 
 ```bash
-ollama pull qwen2.5:3b && ollama pull nomic-embed-text
-uv sync --all-packages --locked && (cd web && npm ci)
+git clone https://github.com/GaryFClemons/StrataFi.git
+cd StrataFi
+ollama pull qwen2.5:3b
+ollama pull nomic-embed-text
+uv sync --all-packages --locked
+npm ci --prefix web
 uv run python scripts/dev_setup.py          # writes .env with random local secrets
-docker compose up -d --wait                 # Postgres; or, on Windows without Docker: scripts/wsl/postgres.sh
+docker compose up -d --wait                 # starts Postgres
 uv run python scripts/local.py up           # gateway, API, worker and web app; Ctrl+C stops them
 ```
 
-Then, in a second terminal, index the demo corpus and evaluate it:
+Then, in a second terminal in the same folder, index the demo corpus and evaluate it (about a
+minute on that laptop):
 
 ```bash
 uv run python scripts/local.py seed
 ```
 
-Open <http://127.0.0.1:5190/stratafi/> and go to **Chat**. For cross-encoder reranking, add
-`--extra rerank` to `uv sync`. Optional services (ClamAV, Apache Tika, SeaweedFS) and a
-containerized lab are Compose profiles; the
-[local development guide](docs/guides/local-development.md) covers them, the Windows setup and
-the tests.
+Open <http://127.0.0.1:5190/stratafi/> and go to **Chat**.
+
+- **Windows without Docker:** WSL can run Postgres instead; see
+  [the guide](docs/guides/local-development.md#in-wsl-without-docker).
+- **macOS:** 14 or newer, since a dependency's wheels need it.
+- **Reranking:** for cross-encoders, add `--extra rerank` to `uv sync`.
+- **Optional services:** ClamAV, Apache Tika, SeaweedFS and a containerized lab are Compose
+  profiles. The [local development guide](docs/guides/local-development.md) covers them and the
+  tests.
 
 ## Architecture
 

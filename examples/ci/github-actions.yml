@@ -37,8 +37,8 @@ jobs:
       STRATAFI_TOKEN: ${{ secrets.STRATAFI_TOKEN }}
       SUITE: stratafi/suites/policies-regression.yaml
       # Where the SDK comes from: the StrataFi repository's packages/sdk at a tag you trust.
-      # Replace OWNER and TAG.
-      STRATAFI_SDK: git+https://github.com/OWNER/StrataFi@TAG#subdirectory=packages/sdk
+      # Replace TAG.
+      STRATAFI_SDK: git+https://github.com/GaryFClemons/StrataFi@TAG#subdirectory=packages/sdk
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

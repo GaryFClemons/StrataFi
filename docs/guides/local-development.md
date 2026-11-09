@@ -44,7 +44,7 @@ uv sync --all-packages --locked
 ```
 
 ```bash
-cd web && npm ci
+npm ci --prefix web
 ```
 
 Write `.env` and the development signing key:
@@ -242,7 +242,7 @@ uv run python -m stratafi_testing.fake_gateway
    exact and a BM25 index. Then it runs it. The first embedding takes a while.
 3. It imports the eval set `halcyon-retrieval`, with 30% of its items held out as the test
    split.
-4. It evaluates three retrieval configs, `local-hybrid`, `local-dense` and `local-keyword`, and
+4. It evaluates three retrieval configs, `local-keyword`, `local-dense` and `local-hybrid`, and
    a fourth, `local-hybrid-rerank`, when the gateway serves `rerank-default`.
 
 It ends with a Compare link and a Chat link. Running it again reuses everything already
