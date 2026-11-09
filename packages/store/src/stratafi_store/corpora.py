@@ -421,10 +421,12 @@ def version_entries(
 def planner_entries(entries: Sequence[Entry]) -> list[EntryInput]:
     """A version's entries as the run planner sees them, in name order: a duplicate's bytes
     match an earlier entry's, and a document without a title is labelled by its key, else by
-    its file's stem. Runs and experiment plans both read entries this way, so their keys agree."""
+    its file's stem. Runs and experiment plans both read entries this way, so their keys agree.
+    The name order is Python's, not the database's: a collation depends on how the database was
+    installed, and which of two entries is the duplicate must not."""
     seen: set[str] = set()
     found = []
-    for entry in entries:
+    for entry in sorted(entries, key=lambda entry: entry.name):
         path = PurePosixPath(entry.name)
         found.append(
             EntryInput(
