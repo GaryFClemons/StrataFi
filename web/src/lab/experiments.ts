@@ -151,19 +151,25 @@ export function rungTrail(rungs: readonly Record<string, unknown>[]): string {
   return sizes;
 }
 
-/** A start for a new experiment's YAML: names to replace with the workspace's own. */
+/**
+ * A start for a new experiment's YAML. It names what the demo seed saves and needs no extras,
+ * so it runs as it is; replace the names with the workspace's own.
+ */
 export const EXAMPLE_EXPERIMENT = `schema: stratafi.experiment.v1
-name: chunking-and-models
+name: chunkers-and-fusion
 corpus: halcyon@latest
 eval_set: {name: halcyon-retrieval}
-base: {pipeline: baseline-v1, retrieval: hybrid-v1}
+base: {pipeline: local-baseline, retrieval: local-hybrid}
 objective: {metric: recall@5, checkpoint: final, goal: maximize}
 constraints:
   - {metric: must_not_return_violations, max: 0}
   - {metric: latency_ms.p95, max: 800}
 factors:
-  chunk.params.max_tokens: [400, 800]
-  rerank: [rerank/none, {component: rerank/gateway}]
+  chunk:
+    - chunk/sections
+    - {component: chunk/recursive, params: {size: 256, overlap: 32}}
+    - {component: chunk/fixed-tokens, params: {size: 256, overlap: 32}}
+  fusion.k: [20, 60]
 strategy: grid
 budget: {max_trials: 20, max_cost_usd: 5}
 `;

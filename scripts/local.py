@@ -347,18 +347,20 @@ def _retrieval(name: str, **changes: Any) -> dict[str, Any]:
     }
 
 
+# Evaluated in this order. The lab lists the newest first, so its screens open on hybrid, which
+# a query adapter can train from (it needs vectors, so keyword search alone won't do).
 RETRIEVAL = [
-    _retrieval("local-hybrid"),
-    _retrieval(
-        "local-dense",
-        retrievers={"dense": {"top_n": 50}, "keyword": None},
-        fusion={"method": "none"},
-    ),
     _retrieval(
         "local-keyword",
         retrievers={"dense": None, "keyword": {"top_n": 50}},
         fusion={"method": "none"},
     ),
+    _retrieval(
+        "local-dense",
+        retrievers={"dense": {"top_n": 50}, "keyword": None},
+        fusion={"method": "none"},
+    ),
+    _retrieval("local-hybrid"),
 ]
 
 

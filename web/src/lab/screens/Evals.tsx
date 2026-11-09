@@ -45,12 +45,12 @@ const HYBRID = {
   schema: "stratafi.retrieval.v1" as const,
   name: "hybrid-v1",
   description:
-    "Hybrid search: BM25 and exact dense, RRF k = 60 over 50, the gateway reranker, top 8",
+    "Hybrid search: BM25 and exact dense, RRF k = 60 over 50, no reranker, top 8",
   retrievers: { dense: { top_n: 50 }, keyword: { top_n: 50 } },
   fusion: { method: "rrf" as const, k: 60, alpha: 0.5 },
   candidates: 50,
   filters: { current_only: true },
-  rerank: { component: "rerank/gateway", params: { alias: "rerank-default" } },
+  rerank: { component: "rerank/none" },
   top_k: 8,
 };
 

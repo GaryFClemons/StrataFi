@@ -11,8 +11,8 @@ export const EXAMPLE_SUITE = `schema: stratafi.test-suite.v1
 name: policies-regression
 description: Guards the handbook's answers whenever the corpus or the pipeline changes.
 target:
-  pipeline: baseline-v1
-  retrieval: hybrid-v1
+  pipeline: local-baseline
+  retrieval: local-hybrid
 corpus: halcyon@latest
 eval_set: {name: halcyon-retrieval, split: dev}
 baseline: last_passing

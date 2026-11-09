@@ -53,7 +53,10 @@ export function Home() {
         {runs.data === undefined ? (
           <Loading />
         ) : runs.data.length === 0 ? (
-          <Empty>No runs yet.</Empty>
+          <Empty>
+            No runs yet. To load the demo corpus, run{" "}
+            <code>uv run python scripts/local.py seed</code>.
+          </Empty>
         ) : (
           <DataTable<RunOut>
             label="Recent runs"
