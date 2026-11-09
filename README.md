@@ -35,6 +35,14 @@ in the screenshot above.
 
 ![The Compare screen: four retrieval configs on the demo set, each metric with its 95% interval, paired against a baseline](docs/images/compare.png)
 
+![Compare's charts for three retrieval configs: recall at every k, where the evidence survives along retrieval, where queries were lost, and quality against latency](docs/images/compare-charts.png)
+
+![Parallel coordinates from the parameters that differ to the metrics, and hit@5 by file type, for the same three configs](docs/images/compare-parallel.png)
+
+The latency gap in these two is the query-embedding cache, not the retrievers. Dense was the first
+config to embed the questions, so nearly all of its 219 ms p95 is that; hybrid, evaluated next,
+reuses the cached vectors.
+
 ## What's inside
 
 - **Pipelines as versioned specs.** Every stage is a pluggable component, 67 in all: sources
@@ -72,6 +80,8 @@ in the screenshot above.
   plus the web app's.
 
 ![A pipeline run: every stage's tasks for the 24 demo documents, with a re-run from any stage](docs/images/pipeline.png)
+
+![Part of a pipeline's map: its parsers, the query path from embedding to the top 8, and the datastores it reads, with the query text that leaves the lab in orange](docs/images/pipeline-map.png)
 
 ## Quick start
 
